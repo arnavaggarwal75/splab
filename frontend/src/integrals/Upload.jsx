@@ -1,18 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaCamera } from "react-icons/fa";
 
 const Bill = () => {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [file, setFile] = useState(null);
   const navigate = useNavigate();
 
   const handleImageChange = (e) => {
-    if (e.target.files[0]) {
-      const imageUrl = URL.createObjectURL(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
       setSelectedImage(imageUrl);
-      setFile(e.target.files[0]);
     }
   };
 
@@ -20,10 +18,8 @@ const Bill = () => {
     setSelectedImage(null);
   };
 
-  const handleProceed = async () => {
-    navigate(`/confirm-upload`, {
-      state: {imageFile: file}
-    });
+  const handleProceed = () => {
+    navigate("/confirm-upload"); 
   };
 
   return (

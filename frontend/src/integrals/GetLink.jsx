@@ -1,23 +1,14 @@
 import React from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const GetLink = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [shareLink, setShareLink] = useState("");
+  const shareLink = "https://splabapp.com/join/abc123";
   const navigate = useNavigate();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareLink);
   };
-
-  useEffect(() => {
-    if(!searchParams.get("code")) {
-      navigate('/');
-    }
-    setShareLink("/tab-list?code=" + searchParams.get("code"));
-  }, [])
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200 px-8 text-center font-mono">
@@ -33,7 +24,7 @@ const GetLink = () => {
         </p>
 
         <div className="flex items-center justify-between bg-gray-100 rounded-xl p-3 w-full max-w-xs mb-6">
-          <span className="text-xs text-gray-700 truncate">localhost:5173{shareLink}</span>
+          <span className="text-xs text-gray-700 truncate">{shareLink}</span>
           <button
             onClick={handleCopy}
             className="ml-2 px-3 py-1 bg-[var(--secondary)] text-white rounded-full text-xs shadow hover:opacity-90 transition"
@@ -43,7 +34,7 @@ const GetLink = () => {
         </div>
 
         <button
-          onClick={() => navigate(shareLink)}
+          onClick={() => navigate("/tab-list/?code=abc123")}
           className="px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 transition text-sm font-semibold"
         >
           Go to Tab
