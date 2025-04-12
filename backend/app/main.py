@@ -21,6 +21,6 @@ def read_root():
 
 app.include_router(tests.router)
 app.include_router(ocr.router)
-app.mount("/sockets", sockets.socket_app)
+app.mount("/socket.io", sockets.socket_app)
 
 
