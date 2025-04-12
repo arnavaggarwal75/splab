@@ -68,7 +68,8 @@ def add_member_to_tab(tab_id: str, member: dict):
     return tab_id
 
 def remove_member_from_tab(tab_id: str, member_id: str):
-    """Remove a member from the tab"""
+    if invalid_tab_id(tab_id): return None
+    tabs_collection.document(tab_id).collection("members").document(member_id).delete()
 
 def get_members_in_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
@@ -87,8 +88,12 @@ def mark_member_paid(tab_id: str, member_id: str):
     member.update({"paid": True})
     return tab_id
 
-def get_member_share():
-    """Get a member's share of the tab."""
+def get_member_share(tab_id: str, member_id: str):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id).get()
+    if member.exists:
+        return member.to_dict().get("share", 0)
+    return 0
 
 def update_member_share(tab_id: str, member_id: str, share: float):
     if invalid_tab_id(tab_id): return None
