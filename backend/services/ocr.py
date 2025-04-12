@@ -1,5 +1,5 @@
-from model import pipe
-from utils import parse_xml
+from ..model import pipe
+from ..utils import parse_xml
 from PIL import Image
 import io
 

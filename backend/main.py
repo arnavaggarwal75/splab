@@ -1,10 +1,17 @@
 from fastapi import FastAPI, UploadFile
+
+from .routers import tests
+from .routers import ocr
+
 from google.cloud import firestore
-from services.ocr import extract_receipt_info
+from .services.ocr import extract_receipt_info
 
 app = FastAPI()
 
 db = firestore.Client.from_service_account_json('./serviceAccountKey.json')
+
+app.include_router(tests.router)
+app.include_router(ocr.router)
 
 @app.get("/")
 def read_root():
