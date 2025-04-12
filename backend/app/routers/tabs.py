@@ -37,6 +37,13 @@ async def delete_tab(tab_id: str):
             content={"error": f"Tab with ID '{tab_id}' not found or invalid."}
         )
 
+@router.post("/mark_paid/{tab_id}/{member_id}")
+async def mark_member_paid(tab_id: str, member_id: str):
+    mark_member_paid(tab_id, member_id)
+    return JSONResponse(
+        status_code=200,
+        content={"message": f"Member {member_id} in tab {tab_id} marked as paid."}
+    )
 
 @router.post("/add_member")
 async def add_member():
