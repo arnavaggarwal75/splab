@@ -19,7 +19,7 @@ const Bill = () => {
   };
 
   const handleProceed = () => {
-    navigate("/confirm-upload"); 
+    navigate(`/confirm-upload?image=${selectedImage}`); 
   };
 
   return (

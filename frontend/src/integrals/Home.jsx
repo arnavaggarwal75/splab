@@ -6,7 +6,7 @@ import logo from "../assets/logo.png";
 function Home() {
   const [isOwner, setIsOwner] = useState(true);
   const [name, setName] = useState("");
-  const [zelleId, setZelleId] = useState("");
+  const [paymentInfo, setPaymentInfo] = useState("");
   const [code, setCode] = useState("");
   const navigate = useNavigate();
   const { setUser } = useUser();
@@ -14,13 +14,13 @@ function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isOwner) {
-      if (!name || !zelleId) {
+      if (!name || !paymentInfo) {
         alert("Please fill all fields");
         return;
       }
       setUser({
         name,
-        zelleId,
+        paymentInfo,
         isOwner: true,
       });
       navigate("/upload");
@@ -69,9 +69,9 @@ function Home() {
             <input
               className="bg-gray-100 rounded-xl p-3 text-sm border border-gray-300 focus:outline-none"
               type="text"
-              placeholder="Zelle ID"
-              value={zelleId}
-              onChange={(e) => setZelleId(e.target.value)}
+              placeholder="Payment Info"
+              value={paymentInfo}
+              onChange={(e) => setPaymentInfo(e.target.value)}
             />
           ) : (
             <input

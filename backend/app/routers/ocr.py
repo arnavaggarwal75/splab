@@ -28,7 +28,7 @@ router = APIRouter(
 async def extract_receipt(file: UploadFile):
     image_data = await file.read()
     result = extract_receipt_info(image_data, file.filename)
-    return result
+    return result['data']
 
 @router.get("/")
 async def test_root():
