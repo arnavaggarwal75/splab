@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSocket } from "../contexts/SocketContext";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
 
 function TabList() {
   let [searchParams, setSearchParams] = useSearchParams();
   let navigate = useNavigate();
+  const { currentSocket, connectToSocket } = useSocket();
 
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
@@ -65,9 +67,11 @@ function TabList() {
   };
 
   useEffect(() => {
-    if (!searchParams.get("code")) {
+    const code = searchParams.get("code");
+    if (!code) {
       navigate("/");
     }
+    connectToSocket(code);
   }, []);
 
   return (
