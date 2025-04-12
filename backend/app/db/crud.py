@@ -6,6 +6,7 @@ tabs_collection = db.collection("Tabs")
 
 def create_tab(items: list[dict], owner: dict):
     tab_id = generate_unique_tab_id()
+    print(f"Creating tab {tab_id}")
     tabs_collection.document(tab_id).set({"tab_id": tab_id})
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
@@ -15,7 +16,12 @@ def create_tab(items: list[dict], owner: dict):
 def get_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
     tab = tabs_collection.document(tab_id).get()
-    return tab.to_dict()
+    tab_data = tab.to_dict() or {}
+    items_ref = tabs_collection.document(tab_id).collection("items").get()
+    tab_data["items"] = [{"id": item.id, **item.to_dict()} for item in items_ref]
+    members_ref = tabs_collection.document(tab_id).collection("members").get()
+    tab_data["members"] = [{"id": member.id, **member.to_dict()} for member in members_ref]
+    return tab_data
 
 def delete_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
@@ -31,7 +37,7 @@ def add_items_to_tab(tab_id: str, items: list[dict]):
 def get_items_in_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
     items = tabs_collection.document(tab_id).collection("items").get()
-    return [item.to_dict() for item in items] if items else None
+    return [{"id": item.id, **item.to_dict()} for item in items] if items else None
 
 def update_item_members(tab_id: str, item_id: str, members: list[int]):
     if invalid_tab_id(tab_id): return None
@@ -47,7 +53,7 @@ def add_member_to_tab(tab_id: str, member: dict):
 def get_members_in_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
     members = tabs_collection.document(tab_id).collection("members").get()
-    return [member.to_dict() for member in members] if members else None
+    return [{"id": member.id, **member.to_dict()} for member in members] if members else None
 
 def mark_member_submitted(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
