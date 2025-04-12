@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from google.cloud import firestore
+from services.ocr import extract_receipt_info
 
 app = FastAPI()
 
@@ -7,7 +8,14 @@ db = firestore.Client.from_service_account_json('./serviceAccountKey.json')
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"The backend is running unga bunga - 🐒"}
+
+@app.post("/extract-receipt-info")
+async def extract_receipt(file: UploadFile):
+    image_data = await file.read()
+    result = extract_receipt_info(image_data, file.filename)
+    return result
+
 
 
 # Sample Read and Write endpoints for Firestore
