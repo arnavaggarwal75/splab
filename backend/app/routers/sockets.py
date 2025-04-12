@@ -9,6 +9,8 @@ from app.db import (
     get_item_cost,
     add_member_to_tab,
     remove_member_from_tab,
+    get_members_in_tab,
+    mark_member_submitted,
 )
 
 # Create a Socket.IO server instance
@@ -40,7 +42,12 @@ async def disconnect(sid):
 
 @sio.event
 async def submit(sid):
-    print(f"[Socket.IO] {sid} has finished their selections")
+    tab_id, member_id = sid_associations[sid]
+    mark_member_submitted(tab_id, member_id)
+    print(f"[Socket.IO] {sid} finished checking their items.")
+    members = get_members_in_tab(tab_id)
+    allSubmitted = all(member.get("submitted") for member in members)
+    if allSubmitted: await sio.emit("all_submitted", {"tab_id": tab_id}, room=tab_id)
 
 @sio.event
 async def update_checkbox(sid, data):
