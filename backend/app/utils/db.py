@@ -10,3 +10,7 @@ def generate_unique_tab_id():
         doc_ref = db.collection("Tabs").document(tab_id)
         if not doc_ref.get().exists:
             return tab_id
+        
+def invalid_tab_id(tab_id):
+    doc_ref = db.collection("Tabs").document(tab_id)
+    return doc_ref.get().exists
