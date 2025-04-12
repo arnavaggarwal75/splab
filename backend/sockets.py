@@ -1,11 +1,19 @@
 import socketio
+from urllib.parse import parse_qs
 
 # Create a Socket.IO server instance
-sio = socketio.AsyncServer(async_mode='asgi')
+sio = socketio.AsyncServer(
+    async_mode='asgi',
+    cors_allowed_origins=["http://localhost:5173"]
+)
 
 @sio.event
 async def connect(sid, environ):
-    print(f"[Socket.IO] Client connected: {sid}")
+    query_string = environ.get('QUERY_STRING', '')
+    params = parse_qs(query_string)
+    code = params.get('code', [None])[0]
+
+    await sio.enter_room(sid, code)
 
 @sio.event
 async def message(sid, data):
