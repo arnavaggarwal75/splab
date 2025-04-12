@@ -5,7 +5,7 @@ const UserContext = createContext();
 export function UserProvider({ children }) {
   const [user, setUser] = useState({
     name: "",
-    zelleId: "",
+    paymentInfo: "",
     isOwner: false,
   });
 

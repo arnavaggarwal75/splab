@@ -1,30 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
+import axiosClient from "../api/axiosClient";
 import BillItem from "../components/BillItem";
-import { useNavigate } from "react-router-dom";
 
 function ConfirmUpload() {
-  const [items, setItems] = useState([
-    { name: "potato", price: 5 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-    { name: "chicken", price: 6 },
-  ]);
+  const [items, setItems] = useState(null);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    (async () => {
+      const imageUrl = searchParams.get("image");
+      if(!imageUrl) {
+        navigate('/');
+      }
+      
+      const formData = new FormData();
+      try {
+        const res = await fetch(imageUrl);
+        const blob = await res.blob();
+        const file = new File([blob], "recipt.jpg", {type: blob.type})
+        formData.append("file", file);
+      } catch(error) {
+        navigate('/upload');
+        return;
+      } 
+      const response = await axiosClient.post("/ocr/extract", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      const newItems = []
+      for(const item of response.data.items) {
+        for(let i = 0; i < parseInt(item[2]); i++) {
+          newItems.push({
+            name: item[0],
+            price: parseFloat(item[1]),
+          })
+        }
+      }
+      setItems(newItems);
+    })();
+  }, [])
 
   return (
     <div className="relative h-screen flex flex-col items-center font-mono bg-white">
@@ -41,8 +60,8 @@ function ConfirmUpload() {
             />
           ))
         ) : (
-          <h1 className="text-lg font-bold">
-            Items were unable to be recognized... try again!
+          <h1 className="text-center text-lg font-bold">
+            Loading...
           </h1>
         )}
       </div>
