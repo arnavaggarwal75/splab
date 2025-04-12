@@ -39,17 +39,30 @@ def update_item_members(tab_id: str, item_id: str, members: list[int]):
     item.update({"members": members})
     return tab_id   
 
-def add_member_to_tab():
-    """Add a new member to the tab."""
+def add_member_to_tab(tab_id: str, member: dict):
+    if invalid_tab_id(tab_id): return None
+    tabs_collection.document(tab_id).collection("members").add(member)
+    return tab_id
 
-def get_members_in_tab():
-    """Return a list of members in a tab."""
+def get_members_in_tab(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    members = tabs_collection.document(tab_id).collection("members").get()
+    return [member.to_dict() for member in members] if members else None
 
-def mark_member_submitted():
-    """Mark a member as done selecting items."""
+def mark_member_submitted(tab_id: str, member_id: str):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id)
+    member.update({"submitted": True})
+    return tab_id
 
-def mark_member_paid():
-    """Mark a member as having paid."""
+def mark_member_paid(tab_id: str, member_id: str):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id)
+    member.update({"paid": True})
+    return tab_id
 
-def update_member_share():
-    """Update a member's share of the tab."""
+def update_member_share(tab_id: str, member_id: str, share: float):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id)
+    member.update({"share": share})
+    return tab_id
