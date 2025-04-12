@@ -1,5 +1,20 @@
 from fastapi import APIRouter, Request, Response, status
-from app.db.crud import *
+from app.db import (
+    create_tab,
+    delete_tab,
+    mark_member_paid,
+    add_items_to_tab,
+    get_items_in_tab,
+    update_item_members,
+    add_item_members,
+    remove_item_members,
+    get_members_in_item,
+    update_member_share,
+    get_member_share,
+    get_item_cost,
+    add_member_to_tab,
+    remove_member_from_tab,
+)
 from fastapi.responses import JSONResponse
 
 router = APIRouter(
@@ -12,7 +27,7 @@ async def test_root():
     return {"Hello from tabs !"}
 
 @router.post("/create")
-async def create_tab(request: Request):
+async def create_tab_api(request: Request):
     body: dict = await request.json()
     owner_name: str = body.get("owner_name")
     owner_payment_id: str = body.get("owner_payment_id")
@@ -21,14 +36,14 @@ async def create_tab(request: Request):
         "name": owner_name,
         "payment_info": owner_payment_id
     }
-    tab_id: str = create_tab(items=items, owner=owner)
+    tab_id: str = create_tab(items, owner)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"link": f"/{tab_id}"}
     )
 
 @router.delete("/{tab_id}")
-async def delete_tab(tab_id: str):
+async def delete_tab_api(tab_id: str):
     if delete_tab(tab_id) is not None:
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:

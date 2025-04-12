@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers import tests
 from .routers import ocr
 from .routers import sockets
-
+from .routers import tabs
 
 app = FastAPI()
 app.add_middleware(
@@ -21,6 +21,7 @@ def read_root():
 
 app.include_router(tests.router)
 app.include_router(ocr.router)
+app.include_router(tabs.router)
 app.mount("/socket.io", sockets.socket_app)
 
 

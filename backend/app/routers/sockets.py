@@ -1,6 +1,6 @@
 import socketio
 from urllib.parse import parse_qs
-from db import (
+from app.db import (
     add_item_members,
     remove_item_members,
     get_members_in_item,
