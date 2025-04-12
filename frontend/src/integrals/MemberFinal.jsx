@@ -1,12 +1,9 @@
 import React from "react";
 import logo from "../assets/logo.png";
-import { useUser } from "../contexts/UserContext";
-import { useLocation } from "react-router-dom";
 
 const MemberFinal = () => {
-  const [amount, setAmount] = React.useState(location.state.amount);
-  const [zelleId, setZelleId] = React.useState(location.state.zelleId);
-  const location = useLocation();
+  const [amount, setAmount] = React.useState(24.99);
+  const [zelleId, setZelleId] = React.useState("johndoe@email.com");
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200 px-8 text-center font-mono">
