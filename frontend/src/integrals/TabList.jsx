@@ -20,6 +20,7 @@ function TabList() {
   const [share, setShare] = useState(0);
   const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
@@ -60,6 +61,7 @@ function TabList() {
 
     axiosClient.get(`/tabs/info/${code}`).then((response) => {
       setOwnerName(response.data.owner_name);
+      setIsLoading(false);
     });
 
     // connect to socket
@@ -153,6 +155,20 @@ function TabList() {
   useEffect(() => {
     console.log("items", items);
   }, [items]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <RotatingLines
+          strokeColor="grey"
+          strokeWidth="5"
+          animationDuration="0.75"
+          width="30"
+          visible={true}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">

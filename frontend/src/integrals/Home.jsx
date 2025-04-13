@@ -45,7 +45,7 @@ function Home() {
           className=" w-32 h-32 mb-6 flex items-center justify-center "
         />
 
-        <h1 className="text-2xl font-bold mb-2">
+        <h1 className="text-2xl text-center font-bold mb-2">
           {isOwner ? "Create a Splab!" : "Join a Splab!"}
         </h1>
         <p className="text-gray-500 text-sm mb-8">

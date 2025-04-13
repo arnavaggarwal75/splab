@@ -90,7 +90,7 @@ function OwnerFinal() {
         </div>
         <button
             onClick={handleSettleTab}
-            className="mt-6 px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--primary)] transition">
+            className="mt-6 px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--primary)] btn-pressable">
             Settle Splab
           </button>
       </div>

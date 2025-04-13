@@ -68,7 +68,7 @@ const MemberFinal = () => {
 
         <button
           onClick={paymentComplete}
-          className="mt-8 px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 transition text-sm font-semibold"
+          className="mt-8 px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 transition text-sm font-semibold btn-pressable"
         >
           Done
         </button>
