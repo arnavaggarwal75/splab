@@ -109,6 +109,13 @@ def get_item_cost(tab_id: str, item_id: str):
     else:
         return 0
 
+def get_payment_info(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id).get()
+    if tab.exists:
+        return tab.to_dict().get("payment_info", 0)
+    return 0
+
 def member_exists(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
     member = tabs_collection.document(tab_id).collection("members").document(member_id).get()

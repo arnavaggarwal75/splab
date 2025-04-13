@@ -4,6 +4,8 @@ from app.db import (
     delete_tab,
     mark_member_paid,
     get_items_in_tab,
+    get_payment_info,
+    get_member_share,
 )
 from fastapi.responses import JSONResponse
 
@@ -52,6 +54,14 @@ async def delete_tab_api(tab_id: str):
             content={"error": f"Tab with ID '{tab_id}' not found or invalid."}
         )
 
+@router.get("/share/{tab_id}/{member_id}")
+async def get_member_share_api(tab_id: str, member_id: str):
+    share = get_member_share(tab_id, member_id)
+    payment_info = get_payment_info(tab_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"share": share, "payment_info": payment_info},
+    )
 @router.post("/mark_paid/{tab_id}/{member_id}")
 async def mark_member_paid(tab_id: str, member_id: str):
     mark_member_paid(tab_id, member_id)
