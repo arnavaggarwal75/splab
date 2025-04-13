@@ -53,7 +53,7 @@ async def get_tab_items_api(tab_id: str):
 @router.delete("/{tab_id}")
 async def delete_tab_api(tab_id: str):
     if delete_tab(tab_id) is not None:
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return Response("message: Tab deleted successfully", status_code=204)
     else:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -67,8 +67,3 @@ async def mark_member_paid(tab_id: str, member_id: str):
         status_code=200,
         content={"message": f"Member {member_id} in tab {tab_id} marked as paid."}
     )
-
-@router.post("/add_member")
-async def add_member():
-    return {f"Adding member to a specific tab!"}
-
