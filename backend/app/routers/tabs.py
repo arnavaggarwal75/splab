@@ -13,7 +13,8 @@ from app.db import (
     get_item_cost,
     add_member_to_tab,
     remove_member_from_tab,
-    get_members_in_tab
+    get_members_in_tab,
+    get_payment_info
 )
 from fastapi.responses import JSONResponse
 
@@ -55,10 +56,13 @@ async def get_tab_items_api(tab_id: str):
 @router.delete("/{tab_id}")
 async def delete_tab_api(tab_id: str):
     if delete_tab(tab_id) is not None:
-        return Response("message: Tab deleted successfully", status_code=204)
+        return JSONResponse(
+            status_code=200,
+            content={"message": "Tab deleted successfully"}
+        )
     else:
         return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             content={"error": f"Tab with ID '{tab_id}' not found or invalid."}
         )
 
@@ -77,6 +81,14 @@ async def get_members(tab_id: str):
         )
 
 
+@router.get("/share/{tab_id}/{member_id}")
+async def get_member_share_api(tab_id: str, member_id: str):
+    share = get_member_share(tab_id, member_id)
+    payment_info = get_payment_info(tab_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"share": share, "payment_info": payment_info},
+    )
 @router.post("/mark_paid/{tab_id}/{member_id}")
 async def mark_member_paid(tab_id: str, member_id: str):
     mark_member_paid(tab_id, member_id)
