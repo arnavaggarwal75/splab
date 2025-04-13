@@ -36,10 +36,18 @@ async def create_tab_api(request: Request):
         "name": owner_name,
         "payment_info": owner_payment_id
     }
-    tab_id: str = create_tab(items, owner)
+    tab_id, member_id = create_tab(items, owner)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content={"link": f"/{tab_id}"}
+        content={"tab_id": tab_id, "member_id": member_id}
+    )
+
+@router.get("/{tab_id}")
+async def get_tab_items_api(tab_id: str):
+    items: list[dict] = get_items_in_tab(tab_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"items": items}
     )
 
 @router.delete("/{tab_id}")

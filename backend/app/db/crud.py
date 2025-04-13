@@ -11,8 +11,10 @@ def create_tab(items: list[dict], owner: dict):
     tabs_collection.document(tab_id).set({"tab_id": tab_id})
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
-    tabs_collection.document(tab_id).collection("members").add(owner)
-    return tab_id
+    _, owner_ref = tabs_collection.document(tab_id).collection("members").add(owner)
+    print(owner_ref)
+
+    return (tab_id, owner_ref.id)
 
 def get_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None

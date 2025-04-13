@@ -2,12 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import axiosClient from "../api/axiosClient";
+import { useUser } from "../contexts/UserContext";
 import BillItem from "../components/BillItem";
 
 function ConfirmUpload() {
-  const [items, setItems] = useState(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useUser();
+  
+  const [items, setItems] = useState(null);
+
 
   useEffect(() => {
     (async () => {
@@ -45,6 +49,17 @@ function ConfirmUpload() {
     })();
   }, [])
 
+  const createTab = () => {
+    axiosClient.post("/tabs/create", {
+      owner_name: user.name,
+      owner_payment_id: user.payment_info,
+      items,
+    }).then((response) => {
+      console.log(response.data);
+      navigate(`/get-link?code=${response.data.tab_id}&member_id=${response.data.member_id}`)
+    })
+  }
+
   return (
     <div className="relative h-screen flex flex-col items-center font-mono bg-white">
       <h1 className="m-5 text-lg font-bold">Does this look good?</h1>
@@ -73,7 +88,7 @@ function ConfirmUpload() {
           Back
         </button>
         <button
-          onClick={() => navigate("/get-link")}
+          onClick={createTab}
           className="px-15 py-3 bg-[var(--primary)] text-white rounded-full shadow transition"
         >
           Proceed
