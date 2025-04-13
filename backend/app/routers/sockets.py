@@ -76,18 +76,38 @@ async def submit(sid, data):
 @sio.event
 async def update_checkbox(sid, data):
     print(f"[Socket.IO] {sid} is updating checkbox with data: {data}")
+    tab_id = data.get("tab_id")
+    item_id = data.get("item_id")
+    member_id = data.get("member_id")
+    checked = data.get("checked")
     # update checkbox
-    if(data.get("checked")):
-        add_item_members(data.get("tab_id"), data.get("item_id"), data.get("member_id"))
+    if checked:
+        add_item_members(tab_id, item_id, member_id)
     else:
-        remove_item_members(data.get("tab_id"), data.get("item_id"), data.get("member_id"))
+        remove_item_members(tab_id, item_id, member_id)
     
     # update everyone's total (assume members_to_update is up to date)
-    members_to_update = get_members_in_item(data.get("tab_id"), data.get("item_id"))
-    for member in members_to_update:
-        share = get_member_share(data.get("tab_id"), member)
-        share = get_item_cost(data.get("tab_id"), data.get("item_id")) / len(members_to_update)
-        update_member_share(data.get("tab_id"), member, share)
+    members_to_update = get_members_in_item(tab_id, item_id)
+    num_members = len(members_to_update)
+    item_cost = get_item_cost(tab_id, item_id)
+    if checked:
+        for member in members_to_update:
+            share = get_member_share(tab_id, member)
+            if member_id == member: # increase share
+                share += item_cost / num_members
+            else: # decrease share
+                share -= item_cost / (num_members - 1)
+                share += item_cost / num_members
+            update_member_share(tab_id, member, share)
+    else: # checkbox was unchecked
+        for member in members_to_update:
+            share = get_member_share(tab_id, member)
+            share -= item_cost / (num_members + 1)
+            share += item_cost / num_members
+            update_member_share(tab_id, member, share)
+        share = get_member_share(tab_id, member_id)
+        share -= item_cost / (num_members + 1)
+        update_member_share(tab_id, member_id, share)
 
 # ASGI app to mount into FastAPI
 socket_app = socketio.ASGIApp(sio)
