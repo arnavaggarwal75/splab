@@ -16,11 +16,14 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  const connectToSocket = (code) => {
+  const connectToSocket = (code, isOwner, memberName, memberId, onRegistered) => {
     if(!socketRef.current?.connected && !socketRef.attemptConnect) {
       socketRef.current = io("http://localhost:8000", {
         query: {
-          code: code
+          code: code,
+          isOwner: isOwner,
+          member: memberName,
+          memberId: memberId,
         },
         transports: ["websocket"], // Optional: for force WebSocket
         autoConnect: false,
@@ -35,6 +38,11 @@ export const SocketProvider = ({ children }) => {
       socketRef.current.on("disconnect", () => {
         console.log("❌ Disconnected");
       });
+
+      socketRef.current.on("member_registered", (data) => {
+        console.log("Member registered:", data.memberId);
+        if (onRegistered) onRegistered(data.member_id);
+      });  
     }
   }
 

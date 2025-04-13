@@ -3,12 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSocket } from "../contexts/SocketContext";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
+import { useUser } from "../contexts/UserContext";
 
 function TabList() {
-  let [searchParams, setSearchParams] = useSearchParams();
+  let [searchParams] = useSearchParams();
   let navigate = useNavigate();
-  const { currentSocket, connectToSocket } = useSocket();
-
+  const { connectToSocket } = useSocket();
+  const { user, setUser } = useUser();
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
 
@@ -68,10 +69,21 @@ function TabList() {
 
   useEffect(() => {
     const code = searchParams.get("code");
-    if (!code) {
+    if (!code || (user.name === "")) {
       navigate("/");
+      return;
     }
-    connectToSocket(code);
+
+    connectToSocket(
+      code,
+      user.isOwner,
+      user.name,
+      user.memberId,
+      (newMemberId) => {
+        console.log("newMemberId", newMemberId);
+        setUser({...user, memberId: newMemberId});
+      }
+    );
   }, []);
 
   return (

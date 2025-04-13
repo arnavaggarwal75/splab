@@ -18,11 +18,11 @@ const MemberHome = () => {
     }
 
     setUser({
-      name,
+      name: name,
       isOwner: false,
     });
 
-    navigate("/tab-list?code=abc123");
+    navigate("/tab-list?code=ejr349");
   };
 
   return (
