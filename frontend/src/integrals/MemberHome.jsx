@@ -5,6 +5,7 @@ import logo from "../assets/logo.png";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import axiosClient from "../api/axiosClient";
 import { RotatingLines } from "react-loader-spinner";
 
 const MemberHome = () => {
@@ -40,15 +41,10 @@ const MemberHome = () => {
 
   useEffect(() => {
     const fetchTab = async () => {
-      const tabRef = doc(db, "Tabs", code);
-      const docSnap = await getDoc(tabRef);
-      if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
-        setTabOwner(docSnap.data().owner_name);
-      }
+      const response = await axiosClient.get(`/tabs/info/${code}`);
+      setTabOwner(response.data.owner_name);
       setIsLoading(false);
     };
-
     fetchTab();
   }, []);
 
@@ -74,7 +70,9 @@ const MemberHome = () => {
           className="w-32 h-32 mb-6 flex items-center justify-center"
         />
 
-        <h1 className="text-2xl text-center font-bold mb-2">Join {tabOwner}'s Tab</h1>
+        <h1 className="text-2xl text-center font-bold mb-2">
+          Join {tabOwner}'s Tab
+        </h1>
         <p className="text-gray-500 text-sm mb-8">Enter your name to join</p>
 
         <form
