@@ -3,7 +3,6 @@ from app.db import (
     create_tab,
     delete_tab,
     mark_member_paid,
-    add_items_to_tab,
     get_items_in_tab,
     update_item_members,
     add_item_members,
@@ -35,9 +34,11 @@ async def create_tab_api(request: Request):
     items: list[dict] = body.get("items")
     owner: dict = {
         "name": owner_name,
-        "payment_info": owner_payment_id
+        "payment_info": owner_payment_id,
+        "share": 0.0,
+        "submitted": False
     }
-    tab_id, member_id = create_tab(items, owner)
+    tab_id, member_id = create_tab(items, owner, owner_name, owner_payment_id)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"tab_id": tab_id, "member_id": member_id}
