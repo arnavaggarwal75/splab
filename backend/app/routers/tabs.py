@@ -63,7 +63,7 @@ async def delete_tab_api(tab_id: str):
 
 @router.get("/{tab_id}/members")
 async def get_members(tab_id: str):
-    members = get_members_in_tab(tab_id)
+    members: dict = get_members_in_tab(tab_id)
     if members is None:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
