@@ -80,7 +80,6 @@ async def get_members(tab_id: str):
             content={"members": members}
         )
 
-
 @router.get("/share/{tab_id}/{member_id}")
 async def get_member_share_api(tab_id: str, member_id: str):
     share = get_member_share(tab_id, member_id)
@@ -89,8 +88,9 @@ async def get_member_share_api(tab_id: str, member_id: str):
         status_code=status.HTTP_200_OK,
         content={"share": share, "payment_info": payment_info},
     )
+
 @router.post("/mark_paid/{tab_id}/{member_id}")
-async def mark_member_paid(tab_id: str, member_id: str):
+async def mark_member_paid_api(tab_id: str, member_id: str):
     mark_member_paid(tab_id, member_id)
     return JSONResponse(
         status_code=200,
