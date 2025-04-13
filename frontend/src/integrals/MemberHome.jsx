@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { useSearchParams } from "react-router-dom";
 
 const MemberHome = () => {
   const [tabOwner, setTabOwner] = useState("John");
   const navigate = useNavigate();
   const { setUser } = useUser();
   const [name, setName] = useState("");
+  const [searchParams] = useSearchParams();
+  const code = searchParams.get("code");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,12 +21,18 @@ const MemberHome = () => {
     }
 
     setUser({
-      name,
+      name: name,
       isOwner: false,
     });
 
-    navigate("/tab-list?code=abc123");
+    navigate("/tab-list?code=" + code);
   };
+
+  useEffect(() => {
+    if (!code) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200">

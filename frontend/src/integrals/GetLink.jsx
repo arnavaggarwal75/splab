@@ -6,7 +6,7 @@ const GetLink = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [shareLink, setShareLink] = useState("localhost:5173/tab-list?code=PLACEHOLDER")
+  const [shareLink, setShareLink] = useState("localhost:5173/member-home?code=PLACEHOLDER")
 
   useEffect(() => {
     const code = searchParams.get("code")

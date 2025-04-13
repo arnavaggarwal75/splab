@@ -5,28 +5,33 @@ import { io } from "socket.io-client";
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const socketRef = useRef({ attemptConnect: false });
+  const socketRef = useRef(null);
+  const attemptConnect = useRef(false);
 
   useEffect(() => {
     return () => {
-      if(socketRef.current?.attemptConnect) {
+      if(socketRef.current) {
         socketRef.current.disconnect();
         console.log("❌ Disconnected");
       }
     };
   }, []);
 
-  const connectToSocket = (code) => {
-    if(!socketRef.current?.connected && !socketRef.attemptConnect) {
+  const connectToSocket = (code, isOwner, memberName, memberId, paymentInfo, onRegistered) => {
+    if(!socketRef.current && !attemptConnect.current) {
       socketRef.current = io("http://localhost:8000", {
         query: {
-          code: code
+          code: code,
+          isOwner: isOwner,
+          memberName: memberName,
+          memberId: memberId,
+          paymentInfo: paymentInfo,
         },
         transports: ["websocket"], // Optional: for force WebSocket
         autoConnect: false,
       });
       socketRef.current.connect();
-      socketRef.attemptConnect = true;
+      attemptConnect.current = true;
 
       socketRef.current.on("connect", () => {
         console.log("Connected:", socketRef.current.id);
@@ -35,12 +40,17 @@ export const SocketProvider = ({ children }) => {
       socketRef.current.on("disconnect", () => {
         console.log("❌ Disconnected");
       });
+
+      socketRef.current.on("member_registered", (data) => {
+        console.log("Member registered:", data.memberId);
+        if (onRegistered) onRegistered(data.member_id);
+      });  
     }
   }
 
   return (
     <SocketContext.Provider value={{
-      currentSocket: socketRef.current,
+      currentSocketRef: socketRef,
       connectToSocket,
     }}>
       {children}

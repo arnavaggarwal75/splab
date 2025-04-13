@@ -12,8 +12,6 @@ def create_tab(items: list[dict], owner: dict):
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
     _, owner_ref = tabs_collection.document(tab_id).collection("members").add(owner)
-    print(owner_ref)
-
     return (tab_id, owner_ref.id)
 
 def get_tab(tab_id: str):
@@ -66,8 +64,8 @@ def get_members_in_item(tab_id: str, item_id: str):
 
 def add_member_to_tab(tab_id: str, member: dict):
     if invalid_tab_id(tab_id): return None
-    tabs_collection.document(tab_id).collection("members").add(member)
-    return tab_id
+    _, doc_ref = tabs_collection.document(tab_id).collection("members").add(member)
+    return doc_ref.id
 
 def remove_member_from_tab(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
@@ -111,3 +109,7 @@ def get_item_cost(tab_id: str, item_id: str):
     else:
         return 0
 
+def member_exists(tab_id: str, member_id: str):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id).get()
+    return member.exists

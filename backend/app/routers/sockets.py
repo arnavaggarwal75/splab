@@ -11,6 +11,7 @@ from app.db import (
     remove_member_from_tab,
     get_members_in_tab,
     mark_member_submitted,
+    member_exists
 )
 
 # Create a Socket.IO server instance
@@ -23,15 +24,33 @@ sid_associations = {}
 
 @sio.event
 async def connect(sid, environ):
-    # get input from qs
     query_string = environ.get('QUERY_STRING', '')
     params = parse_qs(query_string)
     code = params.get('code', [None])[0]
-    member_id = params.get('member_id', [None])[0]
-
+    member_name = params.get('memberName', [None])[0]
+    is_owner = params.get('isOwner', [None])[0]
+    member_id = params.get('memberId', [None])[0]
+    payment_info = params.get('paymentInfo', [None])[0]
+    member : dict = {
+        "name": member_name,
+        "paid": False,
+        "submitted": False,
+        "share": 0.0
+    } 
+    print(f"Member id {member_id} connected to tab {code} and is the owner: {is_owner}")
+    if (is_owner == "false"): 
+        member_id = add_member_to_tab(code, member)
+        await sio.emit("member_registered", {"member_id": member_id}, to=sid)
+    elif (is_owner == "true" and not member_exists(code, member_id)):
+        member : dict = {
+            "name": member_name,
+            "payment_info": payment_info
+        }
+        member_id = add_member_to_tab(code, member)
+        print("Readding owner to the tab")
+        await sio.emit("member_registered", {"member_id": member_id}, to=sid)
     sid_associations[sid] = (code, member_id)
-    add_member_to_tab(code, member_id)
-    await sio.enter_room(sid, code)
+    await sio.enter_room(sid, code) 
 
 @sio.event
 async def disconnect(sid):
@@ -41,29 +60,54 @@ async def disconnect(sid):
     print(f"[Socket.IO] Client disconnected: {sid}")
 
 @sio.event
-async def submit(sid):
-    tab_id, member_id = sid_associations[sid]
+async def submit(sid, data):
+    tab_id, member_id, tip = data.get("tab_id"), data.get("member_id"), data.get("tip") if data.get("tip") != "" else 0
     mark_member_submitted(tab_id, member_id)
     print(f"[Socket.IO] {sid} finished checking their items.")
-    members = get_members_in_tab(tab_id)
+    oldShare = get_member_share(tab_id, member_id)
+    print("old share: ", oldShare, "tip: ", tip, "new share: ", float(oldShare) + float(tip))
+    update_member_share(tab_id, member_id, float(oldShare) + float(tip))
+    members = get_members_in_tab(tab_id)    
     allSubmitted = all(member.get("submitted") for member in members)
-    if allSubmitted: await sio.emit("all_submitted", {"tab_id": tab_id}, room=tab_id)
+    if allSubmitted: 
+        print("All members have submitted their items.")
+        await sio.emit("all_submitted", {"tab_id": tab_id}, room=tab_id)
 
 @sio.event
 async def update_checkbox(sid, data):
     print(f"[Socket.IO] {sid} is updating checkbox with data: {data}")
+    tab_id = data.get("tab_id")
+    item_id = data.get("item_id")
+    member_id = data.get("member_id")
+    checked = data.get("checked")
     # update checkbox
-    if(data.checked):
-        add_item_members(data.tab_id, data.item_id, data.member_id)
+    if checked:
+        add_item_members(tab_id, item_id, member_id)
     else:
-        remove_item_members(data.tab_id, data.item_id, data.member_id)
+        remove_item_members(tab_id, item_id, member_id)
     
     # update everyone's total (assume members_to_update is up to date)
-    members_to_update = get_members_in_item(data.tab_id, data.item_id)
-    for member in members_to_update:
-        share = get_member_share(data.tab_id, data.item_id, member)
-        share = get_item_cost(data.tab_id, data.item_id) / len(members_to_update)
-        update_member_share(data.tab_id, data.item_id, member, share)
+    members_to_update = get_members_in_item(tab_id, item_id)
+    num_members = len(members_to_update)
+    item_cost = get_item_cost(tab_id, item_id)
+    if checked:
+        for member in members_to_update:
+            share = get_member_share(tab_id, member)
+            if member_id == member: # increase share
+                share += item_cost / num_members
+            else: # decrease share
+                share -= item_cost / (num_members - 1)
+                share += item_cost / num_members
+            update_member_share(tab_id, member, share)
+    else: # checkbox was unchecked
+        for member in members_to_update:
+            share = get_member_share(tab_id, member)
+            share -= item_cost / (num_members + 1)
+            share += item_cost / num_members
+            update_member_share(tab_id, member, share)
+        share = get_member_share(tab_id, member_id)
+        share -= item_cost / (num_members + 1)
+        update_member_share(tab_id, member_id, share)
 
 # ASGI app to mount into FastAPI
 socket_app = socketio.ASGIApp(sio)

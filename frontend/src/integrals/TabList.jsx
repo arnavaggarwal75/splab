@@ -7,18 +7,17 @@ import AvatarCircles from "../components/AvatarCircles";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 
+import { useUser } from "../contexts/UserContext";
 
 function TabList() {
-  let [searchParams, setSearchParams] = useSearchParams();
+  let [searchParams] = useSearchParams();
   let navigate = useNavigate();
-  const { currentSocket, connectToSocket } = useSocket();
-
+  const { currentSocketRef, connectToSocket } = useSocket();
+  const { user, setUser } = useUser();
   const [items, setItems] = useState([]);
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
-
-  const memberId = "GihklyhGeHqzRdW9JPox"; // just for live you owe
 
   const members = [
     "Arnav Aggarwal",
@@ -36,27 +35,78 @@ function TabList() {
     "Siddharth Gupta",
   ];
 
-
   const handleCheckbox = (index) => {
+    const newCheckedState = !checkedItems[index];
     setCheckedItems((prev) => ({
       ...prev,
       [index]: !prev[index],
     }));
+    currentSocketRef.current.emit("update_checkbox", {
+      checked: newCheckedState,
+      tab_id: searchParams.get("code"),
+      item_id: index,
+      member_id: user.memberId,
+    });
   };
 
   const handleSubmit = () => {
-    alert(`Tip: ${tip || 0}, Checked Items: ${JSON.stringify(checkedItems)}`);
+    currentSocketRef.current.emit("submit", {
+      tab_id: searchParams.get("code"),
+      member_id: user.memberId,
+      tip: tip,
+    });
+    alert("Submitted! Please wait for everyone to submit.");
   };
 
   useEffect(() => {
-    // set up socket
     const code = searchParams.get("code");
-    if (!code) {
+    if (!code || user.name === "") {
       navigate("/");
+      return;
     }
-    connectToSocket(code);
 
-    const memberDocRef = doc(db, "Tabs", code, "members", memberId);
+    // get items
+    axiosClient.get(`/tabs/${code}`).then((response) => {
+      console.log(response)
+      setItems(response.data.items)
+    })
+
+    connectToSocket(
+      code,
+      user.isOwner,
+      user.name,
+      user.memberId,
+      user.paymentInfo,
+      (newMemberId) => {
+        console.log("newMemberId", newMemberId);
+        setUser({ ...user, memberId: newMemberId });
+      }
+    );
+    axiosClient.get(`/tabs/${code}`).then((response) => {
+      console.log(response);
+      setItems(response.data.items);
+    });
+
+
+  }, []);
+
+  useEffect(() => {
+    const socket = currentSocketRef.current;
+    if (!socket) return;
+    const code = searchParams.get("code");
+    socket.on("all_submitted", () => {
+      console.log("🎉 All submitted!");
+      if (user.isOwner) {
+        navigate("/owner-final?code=" + code);
+      } else {
+        navigate(`/member-final?code=${code}&memberId=${user.memberId}`);
+      }
+    });
+  }, [currentSocketRef.current, user.memberId, user.isOwner]);
+
+  useEffect(() => {
+    if(user.memberId === undefined) return;
+    const memberDocRef = doc(db, "Tabs", searchParams.get("code"), "members", user.memberId);
     const unsubscribe = onSnapshot(memberDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -66,16 +116,9 @@ function TabList() {
       } else {
         console.warn("Member document not found");
       }
-    });
-    
-    // get items
-    axiosClient.get(`/tabs/${code}`).then((response) => {
-      console.log(response)
-      setItems(response.data.items)
-    })
-
+    }); 
     return () => unsubscribe();
-  }, []);
+  }, [user.memberId]);
 
   return (
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">
@@ -85,16 +128,20 @@ function TabList() {
       {members.length > 0 && <AvatarCircles members={members} />}
 
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-24">
-        {items ? items.map((item, idx) => (
-          <BillItem
-            key={item.id}
-            index={idx + 1}
-            name={item.name}
-            price={item.price}
-            isChecked={!!checkedItems[item.id]}
-            handleCheckbox={() => handleCheckbox(item.id)}
-          />
-        )) : <h1>Is Loading</h1>}
+        {items ? (
+          items.map((item, idx) => (
+            <BillItem
+              key={item.id}
+              index={idx + 1}
+              name={item.name}
+              price={item.price}
+              isChecked={!!checkedItems[item.id]}
+              handleCheckbox={() => handleCheckbox(item.id)}
+            />
+          ))
+        ) : (
+          <h1>Is Loading</h1>
+        )}
       </div>
 
 

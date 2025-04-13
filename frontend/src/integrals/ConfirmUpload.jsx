@@ -52,7 +52,7 @@ function ConfirmUpload() {
   const createTab = () => {
     axiosClient.post("/tabs/create", {
       owner_name: user.name,
-      owner_payment_id: user.payment_info,
+      owner_payment_id: user.paymentInfo,
       items,
     }).then((response) => {
       setUser((prev) => ({...prev, memberId: response.data.member_id}))
