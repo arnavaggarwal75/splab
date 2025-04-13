@@ -4,3 +4,6 @@
     --primary: #61459C;
     --secondary: #A78CDE;
 }
+.btn-pressable {
+    @apply active:scale-95 transition-transform duration-100 hover:opacity-90;
+}  

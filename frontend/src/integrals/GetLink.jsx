@@ -37,7 +37,7 @@ const GetLink = () => {
           <span className="text-xs text-gray-700 truncate">{shareLink}</span>
           <button
             onClick={handleCopy}
-            className="ml-2 px-3 py-1 bg-[var(--secondary)] text-white rounded-full text-xs shadow hover:opacity-90 transition"
+            className="ml-2 px-3 py-1 bg-[var(--primary)] text-white rounded-full text-xs shadow hover:opacity-90 active:opacity-75 active:scale-95 transition duration-150 ease-in-out"
           >
             Copy
           </button>
@@ -45,7 +45,7 @@ const GetLink = () => {
 
         <button
           onClick={() => navigate(`/tab-list/?code=${searchParams.get("code")}`)}
-          className="px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 transition text-sm font-semibold"
+          className="px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 text-sm font-semibold active:opacity-75 active:scale-95 transition duration-150 ease-in-out"
         >
           Go to Tab
         </button>

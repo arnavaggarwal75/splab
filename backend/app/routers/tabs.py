@@ -6,7 +6,8 @@ from app.db import (
     get_items_in_tab,
     get_member_share,
     get_members_in_tab,
-    get_payment_info
+    get_payment_info,
+    get_tab
 )
 from fastapi.responses import JSONResponse
 
@@ -43,6 +44,14 @@ async def get_tab_items_api(tab_id: str):
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"items": items}
+    )
+
+@router.get("/info/{tab_id}")
+async def get_tab_info_api(tab_id: str):
+    response = get_tab(tab_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=response
     )
 
 @router.delete("/{tab_id}")

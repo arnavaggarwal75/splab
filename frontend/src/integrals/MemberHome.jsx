@@ -3,14 +3,18 @@ import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useSearchParams } from "react-router-dom";
+import { db } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { RotatingLines } from "react-loader-spinner";
 
 const MemberHome = () => {
-  const [tabOwner, setTabOwner] = useState("John");
+  const [tabOwner, setTabOwner] = useState("");
   const navigate = useNavigate();
   const { setUser } = useUser();
   const [name, setName] = useState("");
   const [searchParams] = useSearchParams();
   const code = searchParams.get("code");
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,6 +38,34 @@ const MemberHome = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchTab = async () => {
+      const tabRef = doc(db, "Tabs", code);
+      const docSnap = await getDoc(tabRef);
+      if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data());
+        setTabOwner(docSnap.data().owner_name);
+      }
+      setIsLoading(false);
+    };
+
+    fetchTab();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200">
+        <RotatingLines
+          strokeColor="grey"
+          strokeWidth="5"
+          animationDuration="0.75"
+          width="30"
+          visible={true}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200">
       <div className="bg-white p-15 py-5 flex flex-col items-center justify-center rounded-2xl w-[80%] shadow-lg">
@@ -42,7 +74,7 @@ const MemberHome = () => {
           className="w-32 h-32 mb-6 flex items-center justify-center"
         />
 
-        <h1 className="text-2xl font-bold mb-2">Join {tabOwner}'s Tab</h1>
+        <h1 className="text-2xl text-center font-bold mb-2">Join {tabOwner}'s Tab</h1>
         <p className="text-gray-500 text-sm mb-8">Enter your name to join</p>
 
         <form

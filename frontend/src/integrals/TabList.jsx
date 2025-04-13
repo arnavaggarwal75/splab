@@ -6,7 +6,7 @@ import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
 import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
-
+import { RotatingLines } from "react-loader-spinner";
 import { useUser } from "../contexts/UserContext";
 
 function TabList() {
@@ -19,6 +19,7 @@ function TabList() {
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
   const [members, setMembers] = useState([]);
+  const [ownerName, setOwnerName] = useState("");
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
@@ -53,9 +54,13 @@ function TabList() {
 
     // get items
     axiosClient.get(`/tabs/${code}`).then((response) => {
-      console.log(response)
-      setItems(response.data.items)
-    })
+      console.log(response);
+      setItems(response.data.items);
+    });
+
+    axiosClient.get(`/tabs/info/${code}`).then((response) => {
+      setOwnerName(response.data.owner_name);
+    });
 
     // connect to socket
     connectToSocket(
@@ -75,12 +80,17 @@ function TabList() {
     });
 
     // get list of online members
-    const membersCollectionRef = collection(db, "Tabs", searchParams.get("code"), "members");
+    const membersCollectionRef = collection(
+      db,
+      "Tabs",
+      searchParams.get("code"),
+      "members"
+    );
     const unsubscribe = onSnapshot(membersCollectionRef, (collectionSnap) => {
-      let membersBuffer = []
+      let membersBuffer = [];
       collectionSnap.forEach((doc) => {
         membersBuffer.push(doc.data().name);
-      })
+      });
       setMembers(membersBuffer);
     });
     return () => unsubscribe();
@@ -101,46 +111,52 @@ function TabList() {
   }, [currentSocketRef.current, user.memberId, user.isOwner]);
 
   useEffect(() => {
-    if(user.memberId === undefined) return;
-    const memberDocRef = doc(db, "Tabs", searchParams.get("code"), "members", user.memberId);
+    if (user.memberId === undefined) return;
+    const memberDocRef = doc(
+      db,
+      "Tabs",
+      searchParams.get("code"),
+      "members",
+      user.memberId
+    );
     console.log("userid", user.memberId);
     const unsubscribe = onSnapshot(memberDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.share !== undefined) {
-          setShare(data.share); 
+          setShare(data.share);
         }
       } else {
         console.warn("Member document not found");
       }
-    }); 
+    });
     return () => unsubscribe();
   }, [user.memberId]);
 
   useEffect(() => {
     const code = searchParams.get("code");
     if (!code) return;
-  
+
     const itemsCollectionRef = collection(db, "Tabs", code, "items");
     console.log("itemsCollectionRef", itemsCollectionRef);
     const unsubscribe = onSnapshot(itemsCollectionRef, (snapshot) => {
-      const updatedItems = snapshot.docs.map(doc => ({
+      const updatedItems = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setItems(updatedItems);
     });
-  
+
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     console.log("items", items);
   }, [items]);
-  
+
   return (
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">
-      <h1 className="mt-3 text-lg font-bold">Your Tab</h1>
+      <h1 className="mt-3 text-lg font-bold">{user.isOwner ? "Your Tab" : ownerName + "'s Tab"}</h1>
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
       {members.length > 0 && <AvatarCircles members={members} />}
@@ -155,14 +171,21 @@ function TabList() {
               price={item.price}
               isChecked={!!checkedItems[item.id]}
               handleCheckbox={() => handleCheckbox(item.id)}
-              checkedBy={item.members ? item.members.map((member) => member.name) : []}
+              checkedBy={
+                item.members ? item.members.map((member) => member.name) : []
+              }
             />
           ))
         ) : (
-          <h1>Is Loading</h1>
+          <RotatingLines
+            strokeColor="grey"
+            strokeWidth="5"
+            animationDuration="0.75"
+            width="30"
+            visible={true}
+          />
         )}
       </div>
-
 
       <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 shadow-xl">
         <div className="flex justify-center py-2">
@@ -172,7 +195,8 @@ function TabList() {
         </div>
         <div className="flex items-center justify-evenly px-6 py-4">
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={tip}
             onChange={(e) => setTip(e.target.value)}
             placeholder="Tip ($)"

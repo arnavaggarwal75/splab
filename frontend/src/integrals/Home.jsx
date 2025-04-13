@@ -85,7 +85,7 @@ function Home() {
 
           <button
             type="submit"
-            className=" text-black font-semibold rounded-full py-3 mt-4 shadow-md bg-[var(--secondary)]"
+            className=" text-black font-semibold rounded-full py-3 mt-4 shadow-md bg-[var(--secondary)] btn-pressable"
           >
             {isOwner ? "Create Splab" : "Join Splab"}
           </button>
