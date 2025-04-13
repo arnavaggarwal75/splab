@@ -7,6 +7,7 @@ export function UserProvider({ children }) {
     name: "",
     paymentInfo: "",
     isOwner: false,
+    memberId: "",
   });
 
   return (

@@ -1,10 +1,20 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const GetLink = () => {
-  const shareLink = "https://splabapp.com/join/abc123";
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const [shareLink, setShareLink] = useState("localhost:5173/tab-list?code=PLACEHOLDER")
+
+  useEffect(() => {
+    const code = searchParams.get("code")
+    if(!code) {
+      navigate("/")
+    }
+    setShareLink((prev) => prev.replace("PLACEHOLDER", code))
+  }, [searchParams])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareLink);
@@ -34,7 +44,7 @@ const GetLink = () => {
         </div>
 
         <button
-          onClick={() => navigate("/tab-list/?code=abc123")}
+          onClick={() => navigate(`/tab-list/?code=${searchParams.get("code")}`)}
           className="px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 transition text-sm font-semibold"
         >
           Go to Tab
