@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
 
   const connectToSocket = (code, isOwner, memberName, memberId, paymentInfo, onRegistered) => {
     if(!socketRef.current && !attemptConnect.current) {
-      socketRef.current = io(import.meta.VITE_API_URL, {
+      socketRef.current = io(import.meta.env.VITE_API_URL, {
         query: {
           code: code,
           isOwner: isOwner,
