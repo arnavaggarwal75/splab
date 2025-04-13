@@ -40,17 +40,31 @@ def get_items_in_tab(tab_id: str):
     items = tabs_collection.document(tab_id).collection("items").get()
     return [{"id": item.id, **item.to_dict()} for item in items] if items else None
 
-def update_item_members(tab_id: str, item_id: str, members: list[str]):
+def update_item_members(tab_id: str, item_id: str, members: list[dict]):
     if invalid_tab_id(tab_id): return None
     item = tabs_collection.document(tab_id).collection("items").document(item_id)
     item.update({"members": members})
     return tab_id
 
-def add_item_members(tab_id: str, item_id: str, member_id: str):
-    update_item_members(tab_id, item_id, firestore.ArrayUnion([member_id]))
+def add_item_members(tab_id: str, item_id: str, member_id: str, member_name: str):
+    if invalid_tab_id(tab_id): return None
+    item = tabs_collection.document(tab_id).collection("items").document(item_id)
+    item.update({
+        "members": firestore.ArrayUnion([{
+            "id": member_id,
+            "name": member_name
+        }])
+    })
+    return tab_id
 
 def remove_item_members(tab_id: str, item_id: str, member_id: str):
-    update_item_members(tab_id, item_id, firestore.ArrayRemove([member_id]))
+    if invalid_tab_id(tab_id): return None
+    item_ref = tabs_collection.document(tab_id).collection("items").document(item_id)
+    item_doc = item_ref.get()
+    if item_doc.exists:
+        current_members = item_doc.to_dict().get("members", [])
+        updated_members = [m for m in current_members if m.get("id") != member_id]
+        item_ref.update({"members": updated_members})
 
 def get_members_in_item(tab_id: str, item_id: str):
     if invalid_tab_id(tab_id): return None

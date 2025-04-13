@@ -4,7 +4,7 @@ import { useSocket } from "../contexts/SocketContext";
 import axiosClient from "../api/axiosClient";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
-import { doc, collection, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
 
 import { useUser } from "../contexts/UserContext";
@@ -31,6 +31,7 @@ function TabList() {
       tab_id: searchParams.get("code"),
       item_id: index,
       member_id: user.memberId,
+      member_name: user.name,
     });
   };
 
@@ -116,6 +117,27 @@ function TabList() {
     return () => unsubscribe();
   }, [user.memberId]);
 
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (!code) return;
+  
+    const itemsCollectionRef = collection(db, "Tabs", code, "items");
+    console.log("itemsCollectionRef", itemsCollectionRef);
+    const unsubscribe = onSnapshot(itemsCollectionRef, (snapshot) => {
+      const updatedItems = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setItems(updatedItems);
+    });
+  
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    console.log("items", items);
+  }, [items]);
+  
   return (
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">
       <h1 className="mt-3 text-lg font-bold">Your Tab</h1>
@@ -133,6 +155,7 @@ function TabList() {
               price={item.price}
               isChecked={!!checkedItems[item.id]}
               handleCheckbox={() => handleCheckbox(item.id)}
+              checkedBy={item.members ? item.members.map((member) => member.name) : []}
             />
           ))
         ) : (
