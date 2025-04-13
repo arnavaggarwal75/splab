@@ -14,6 +14,7 @@ from app.db import (
     get_item_cost,
     add_member_to_tab,
     remove_member_from_tab,
+    get_members_in_tab
 )
 from fastapi.responses import JSONResponse
 
@@ -36,21 +37,44 @@ async def create_tab_api(request: Request):
         "name": owner_name,
         "payment_info": owner_payment_id
     }
-    tab_id: str = create_tab(items, owner)
+    tab_id, member_id = create_tab(items, owner)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content={"link": f"/{tab_id}"}
+        content={"tab_id": tab_id, "member_id": member_id}
+    )
+
+@router.get("/{tab_id}")
+async def get_tab_items_api(tab_id: str):
+    items: list[dict] = get_items_in_tab(tab_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"items": items}
     )
 
 @router.delete("/{tab_id}")
 async def delete_tab_api(tab_id: str):
     if delete_tab(tab_id) is not None:
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
+        return Response("message: Tab deleted successfully", status_code=204)
     else:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"error": f"Tab with ID '{tab_id}' not found or invalid."}
         )
+
+@router.get("/{tab_id}/members")
+async def get_members(tab_id: str):
+    members = get_members_in_tab(tab_id)
+    if members is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Tab with ID '{tab_id}' not found or invalid."}
+        )
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"members": members}
+        )
+
 
 @router.post("/mark_paid/{tab_id}/{member_id}")
 async def mark_member_paid(tab_id: str, member_id: str):
@@ -59,8 +83,3 @@ async def mark_member_paid(tab_id: str, member_id: str):
         status_code=200,
         content={"message": f"Member {member_id} in tab {tab_id} marked as paid."}
     )
-
-@router.post("/add_member")
-async def add_member():
-    return {f"Adding member to a specific tab!"}
-
