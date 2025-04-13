@@ -17,14 +17,15 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  const connectToSocket = (code, isOwner, memberName, memberId, onRegistered) => {
+  const connectToSocket = (code, isOwner, memberName, memberId, paymentInfo, onRegistered) => {
     if(!socketRef.current && !attemptConnect.current) {
       socketRef.current = io("http://localhost:8000", {
         query: {
           code: code,
           isOwner: isOwner,
-          member: memberName,
+          memberName: memberName,
           memberId: memberId,
+          paymentInfo: paymentInfo,
         },
         transports: ["websocket"], // Optional: for force WebSocket
         autoConnect: false,

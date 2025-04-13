@@ -111,3 +111,7 @@ def get_item_cost(tab_id: str, item_id: str):
     else:
         return 0
 
+def member_exists(tab_id: str, member_id: str):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id).get()
+    return member.exists
