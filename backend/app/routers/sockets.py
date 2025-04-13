@@ -99,16 +99,16 @@ async def update_checkbox(sid, data):
             else: # decrease share
                 share -= item_cost / (num_members - 1)
                 share += item_cost / num_members
-            update_member_share(tab_id, member, share)
+            update_member_share(tab_id, member, round(share, 2))
     else: # checkbox was unchecked
         for member in members_to_update:
             share = get_member_share(tab_id, member)
             share -= item_cost / (num_members + 1)
             share += item_cost / num_members
-            update_member_share(tab_id, member, share)
+            update_member_share(tab_id, member, round(share, 2))
         share = get_member_share(tab_id, member_id)
         share -= item_cost / (num_members + 1)
-        update_member_share(tab_id, member_id, share)
+        update_member_share(tab_id, member_id, round(share, 2))
 
 # ASGI app to mount into FastAPI
 socket_app = socketio.ASGIApp(sio)

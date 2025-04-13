@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
-import axiosClient from "../api/axiosClient";  // Your custom Axios instance
+import axiosClient from "../api/axiosClient";  
 import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../../firebase"; // Adjust import path if needed
+import { db } from "../../firebase"; 
 import MemberSplit from "../components/MemberSplit";
 import logo from "../assets/logo.png";
+import { useSearchParams } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 function OwnerFinal() {
-  // Store all members returned from the backend (and updated in real time)
   const [members, setMembers] = useState([]);
 
-  // 1) Hardcode the Tab ID for now
-  const tabId = "mid771";
+  const [searchParams] = useSearchParams();
+  const tabId = searchParams.get("code");
+
+  const { user } = useUser();
+
 
   useEffect(() => {
     // 2) Call your FastAPI endpoint once on mount to load initial data
@@ -41,6 +45,21 @@ function OwnerFinal() {
     return () => unsubscribe();
   }, []);
 
+
+  const handleSettleTab = () => {
+    axiosClient
+      .delete(`/tabs/${tabId}`)
+      .then(() => {
+        alert("Tab has been settled and deleted.");
+        // Optionally redirect or clear state
+      })
+      .catch((err) => {
+        console.error("Error settling tab:", err);
+        alert("Something went wrong while settling the tab.");
+      });
+  };
+  
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200 px-8 text-center font-mono">
       <div className="bg-white p-8 py-6 flex flex-col items-center justify-center rounded-2xl w-[80%] shadow-lg">
@@ -57,16 +76,21 @@ function OwnerFinal() {
 
         <div className="w-full flex flex-col gap-2 border-t border-gray-300 overflow-y-scroll max-h-64">
           {members.map((member) => (
-            <MemberSplit
-              key={member.id}   // or idx if no 'id' from your endpoint
-              name={member.name || "Unknown"}
-              // Show the 'share' field if it exists, otherwise 0
-              share={member.share || 0}
-              // Pass the 'submitted' field to show the indicator
-              submitted={!!member.submitted}
-            />
+            member.id !== user.memberId ? (
+              <MemberSplit
+                key={member.id}
+                name={member.name || "Unknown"}
+                share={member.share || 0}
+                submitted={!!member.paid}
+              />
+            ) : null
           ))}
         </div>
+        <button
+            onClick={handleSettleTab}
+            className="mt-6 px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--secondary)] transition">
+            Settle Tab
+          </button>
       </div>
     </div>
   );
