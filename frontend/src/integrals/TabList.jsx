@@ -4,7 +4,7 @@ import { useSocket } from "../contexts/SocketContext";
 import axiosClient from "../api/axiosClient";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 
 import { useUser } from "../contexts/UserContext";
@@ -18,22 +18,7 @@ function TabList() {
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
-
-  const members = [
-    "Arnav Aggarwal",
-    "Ishani Mehra",
-    "Cheng Li",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-    "Siddharth Gupta",
-  ];
+  const [members, setMembers] = useState([]);
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
@@ -71,6 +56,7 @@ function TabList() {
       setItems(response.data.items)
     })
 
+    // connect to socket
     connectToSocket(
       code,
       user.isOwner,
@@ -87,7 +73,16 @@ function TabList() {
       setItems(response.data.items);
     });
 
-
+    // get list of online members
+    const membersCollectionRef = collection(db, "Tabs", searchParams.get("code"), "members");
+    const unsubscribe = onSnapshot(membersCollectionRef, (collectionSnap) => {
+      let membersBuffer = []
+      collectionSnap.forEach((doc) => {
+        membersBuffer.push(doc.data().name);
+      })
+      setMembers(membersBuffer);
+    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -107,6 +102,7 @@ function TabList() {
   useEffect(() => {
     if(user.memberId === undefined) return;
     const memberDocRef = doc(db, "Tabs", searchParams.get("code"), "members", user.memberId);
+    console.log("userid", user.memberId);
     const unsubscribe = onSnapshot(memberDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
