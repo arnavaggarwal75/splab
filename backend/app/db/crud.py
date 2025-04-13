@@ -1,6 +1,5 @@
 from app.db import db
-from app.utils import generate_unique_tab_id
-from app.utils import invalid_tab_id
+from app.utils import generate_unique_tab_id, invalid_tab_id, clear_subcollection
 from google.cloud import firestore
 
 tabs_collection = db.collection("Tabs")
@@ -26,7 +25,10 @@ def get_tab(tab_id: str):
 
 def delete_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
-    tabs_collection.document(tab_id).delete()
+    tabs_ref = tabs_collection.document(tab_id)
+    clear_subcollection(tabs_ref, "items")
+    clear_subcollection(tabs_ref, "members")
+    tabs_ref.delete()
     return tab_id
 
 def add_items_to_tab(tab_id: str, items: list[dict]):

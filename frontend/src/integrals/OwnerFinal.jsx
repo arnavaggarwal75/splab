@@ -6,6 +6,7 @@ import MemberSplit from "../components/MemberSplit";
 import logo from "../assets/logo.png";
 import { useSearchParams } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 function OwnerFinal() {
   const [members, setMembers] = useState([]);
@@ -14,6 +15,7 @@ function OwnerFinal() {
   const tabId = searchParams.get("code");
 
   const { user } = useUser();
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -51,7 +53,7 @@ function OwnerFinal() {
       .delete(`/tabs/${tabId}`)
       .then(() => {
         alert("Tab has been settled and deleted.");
-        // Optionally redirect or clear state
+        navigate("/");
       })
       .catch((err) => {
         console.error("Error settling tab:", err);
@@ -88,8 +90,8 @@ function OwnerFinal() {
         </div>
         <button
             onClick={handleSettleTab}
-            className="mt-6 px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--secondary)] transition">
-            Settle Tab
+            className="mt-6 px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--primary)] transition">
+            Settle Splab
           </button>
       </div>
     </div>

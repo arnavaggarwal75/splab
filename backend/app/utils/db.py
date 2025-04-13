@@ -14,3 +14,9 @@ def generate_unique_tab_id():
 def invalid_tab_id(tab_id):
     doc_ref = db.collection("Tabs").document(tab_id)
     return not doc_ref.get().exists
+
+def clear_subcollection(doc_ref, subcollection_name):
+    subcollection_ref = doc_ref.collection(subcollection_name)
+    docs = subcollection_ref.stream()
+    for doc in docs:
+        doc.reference.delete()
