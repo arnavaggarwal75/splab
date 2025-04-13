@@ -8,7 +8,7 @@ import BillItem from "../components/BillItem";
 function ConfirmUpload() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   
   const [items, setItems] = useState(null);
 
@@ -55,8 +55,8 @@ function ConfirmUpload() {
       owner_payment_id: user.payment_info,
       items,
     }).then((response) => {
-      console.log(response.data);
-      navigate(`/get-link?code=${response.data.tab_id}&member_id=${response.data.member_id}`)
+      setUser((prev) => ({...prev, memberId: response.data.member_id}))
+      navigate(`/get-link?code=${response.data.tab_id}`)
     })
   }
 
