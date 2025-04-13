@@ -44,7 +44,9 @@ async def connect(sid, environ):
     elif (is_owner == "true" and not member_exists(code, member_id)):
         member : dict = {
             "name": member_name,
-            "payment_info": payment_info
+            "payment_info": payment_info,
+            "submitted": False,
+            "share": 0.0
         }
         member_id = add_member_to_tab(code, member)
         print("Readding owner to the tab")
@@ -80,14 +82,13 @@ async def update_checkbox(sid, data):
     item_id = data.get("item_id")
     member_id = data.get("member_id")
     checked = data.get("checked")
+    member_name = data.get("member_name")
     # update checkbox
     if checked:
-        add_item_members(tab_id, item_id, member_id)
+        add_item_members(tab_id, item_id, member_id, member_name)
     else:
         remove_item_members(tab_id, item_id, member_id)
-    
-    # update everyone's total (assume members_to_update is up to date)
-    members_to_update = get_members_in_item(tab_id, item_id)
+    members_to_update = [m.get("id") for m in get_members_in_item(tab_id, item_id)]
     num_members = len(members_to_update)
     item_cost = get_item_cost(tab_id, item_id)
     if checked:
