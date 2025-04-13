@@ -64,8 +64,8 @@ def get_members_in_item(tab_id: str, item_id: str):
 
 def add_member_to_tab(tab_id: str, member: dict):
     if invalid_tab_id(tab_id): return None
-    tabs_collection.document(tab_id).collection("members").add(member)
-    return tab_id
+    _, doc_ref = tabs_collection.document(tab_id).collection("members").add(member)
+    return doc_ref.id
 
 def remove_member_from_tab(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None

@@ -23,20 +23,26 @@ sid_associations = {}
 
 @sio.event
 async def connect(sid, environ):
-    # get input from qs
     query_string = environ.get('QUERY_STRING', '')
     params = parse_qs(query_string)
     code = params.get('code', [None])[0]
-    member_id = params.get('member_id', [None])[0]
-
+    member_name = params.get('member', [None])[0]
+    is_owner = params.get('isOwner', [None])[0]
+    member_id = params.get('memberId', [None])[0]
+    member : dict = {
+        "name": member_name,
+        "paid": False,
+        "submitted": False,
+        "share": 0.0
+    } 
+    if (is_owner == "false"): 
+        member_id = add_member_to_tab(code, member)
+        await sio.emit("member_registered", {"member_id": member_id}, to=sid)
     sid_associations[sid] = (code, member_id)
-    add_member_to_tab(code, member_id)
     await sio.enter_room(sid, code)
 
 @sio.event
 async def disconnect(sid):
-    tab_id, member_id = sid_associations[sid]
-    remove_member_from_tab(tab_id, member_id)
     del sid_associations[sid]
     print(f"[Socket.IO] Client disconnected: {sid}")
 
