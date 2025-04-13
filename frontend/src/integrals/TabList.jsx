@@ -3,14 +3,19 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSocket } from "../contexts/SocketContext";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase";
+
 
 function TabList() {
   let [searchParams, setSearchParams] = useSearchParams();
   let navigate = useNavigate();
   const { currentSocket, connectToSocket } = useSocket();
-
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
+  const [share, setShare] = useState(0);
+
+  const memberId = "KrWPY30A8lHBPAQnZAYu"; 
 
   const members = [
     "Arnav Aggarwal",
@@ -72,6 +77,19 @@ function TabList() {
       navigate("/");
     }
     connectToSocket(code);
+
+    const memberDocRef = doc(db, "Tabs", code, "members", memberId);
+    const unsubscribe = onSnapshot(memberDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.share !== undefined) {
+          setShare(data.share); 
+        }
+      } else {
+        console.warn("Member document not found");
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -81,7 +99,7 @@ function TabList() {
 
       {members.length > 0 && <AvatarCircles members={members} />}
 
-      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-24">
+      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-36">
         <BillItem
           index={1}
           price={18.99}
@@ -103,20 +121,28 @@ function TabList() {
         ))}
       </div>
 
-      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 flex items-center justify-evenly px-6 py-4 shadow-xl">
-        <input
-          type="number"
-          value={tip}
-          onChange={(e) => setTip(e.target.value)}
-          placeholder="Tip ($)"
-          className="border border-[var(--primary)] text-center rounded-full p-2 w-24 text-sm bg-white/70 backdrop-blur-sm focus:outline-none"
-        />
-        <button
-          onClick={handleSubmit}
-          className="px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--secondary)] transition"
-        >
-          Submit
-        </button>
+
+      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 shadow-xl">
+        <div className="flex justify-center py-2">
+          <span className="text-black text-lg font-semibold">
+            You owe: ${share}
+          </span>
+        </div>
+        <div className="flex items-center justify-evenly px-6 py-4">
+          <input
+            type="number"
+            value={tip}
+            onChange={(e) => setTip(e.target.value)}
+            placeholder="Tip ($)"
+            className="border border-[var(--primary)] text-center rounded-full p-2 w-24 text-sm bg-white/70 backdrop-blur-sm focus:outline-none"
+          />
+          <button
+            onClick={handleSubmit}
+            className="px-6 py-2 rounded-full text-white font-semibold shadow-md bg-[var(--secondary)] transition"
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );
