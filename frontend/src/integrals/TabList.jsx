@@ -9,7 +9,7 @@ import { useUser } from "../contexts/UserContext";
 function TabList() {
   let [searchParams] = useSearchParams();
   let navigate = useNavigate();
-  const { connectToSocket } = useSocket();
+  const { currentSocketRef, connectToSocket } = useSocket();
   const { user, setUser } = useUser();
   const [items, setItems] = useState([]);
   const [checkedItems, setCheckedItems] = useState({});
@@ -33,10 +33,18 @@ function TabList() {
 
 
   const handleCheckbox = (index) => {
+    const newCheckedState = !checkedItems[index];
     setCheckedItems((prev) => ({
       ...prev,
       [index]: !prev[index],
     }));
+    currentSocketRef.current.emit("update_checkbox", {
+      checked: newCheckedState,
+      tab_id: searchParams.get("code"),
+      item_id: index,
+      member_id: user.memberId,
+    });
+    
   };
 
   const handleSubmit = () => {

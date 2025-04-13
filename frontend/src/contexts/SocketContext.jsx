@@ -5,11 +5,12 @@ import { io } from "socket.io-client";
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const socketRef = useRef({ attemptConnect: false });
+  const socketRef = useRef(null);
+  const attemptConnect = useRef(false);
 
   useEffect(() => {
     return () => {
-      if(socketRef.current?.attemptConnect) {
+      if(socketRef.current) {
         socketRef.current.disconnect();
         console.log("❌ Disconnected");
       }
@@ -17,7 +18,7 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   const connectToSocket = (code, isOwner, memberName, memberId, onRegistered) => {
-    if(!socketRef.current?.connected && !socketRef.attemptConnect) {
+    if(!socketRef.current && !attemptConnect.current) {
       socketRef.current = io("http://localhost:8000", {
         query: {
           code: code,
@@ -29,7 +30,7 @@ export const SocketProvider = ({ children }) => {
         autoConnect: false,
       });
       socketRef.current.connect();
-      socketRef.attemptConnect = true;
+      attemptConnect.current = true;
 
       socketRef.current.on("connect", () => {
         console.log("Connected:", socketRef.current.id);
@@ -48,7 +49,7 @@ export const SocketProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider value={{
-      currentSocket: socketRef.current,
+      currentSocketRef: socketRef,
       connectToSocket,
     }}>
       {children}

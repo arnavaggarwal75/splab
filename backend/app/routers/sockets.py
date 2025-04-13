@@ -60,17 +60,17 @@ async def submit(sid):
 async def update_checkbox(sid, data):
     print(f"[Socket.IO] {sid} is updating checkbox with data: {data}")
     # update checkbox
-    if(data.checked):
-        add_item_members(data.tab_id, data.item_id, data.member_id)
+    if(data.get("checked")):
+        add_item_members(data.get("tab_id"), data.get("item_id"), data.get("member_id"))
     else:
-        remove_item_members(data.tab_id, data.item_id, data.member_id)
+        remove_item_members(data.get("tab_id"), data.get("item_id"), data.get("member_id"))
     
     # update everyone's total (assume members_to_update is up to date)
-    members_to_update = get_members_in_item(data.tab_id, data.item_id)
+    members_to_update = get_members_in_item(data.get("tab_id"), data.get("item_id"))
     for member in members_to_update:
-        share = get_member_share(data.tab_id, data.item_id, member)
-        share = get_item_cost(data.tab_id, data.item_id) / len(members_to_update)
-        update_member_share(data.tab_id, data.item_id, member, share)
+        share = get_member_share(data.get("tab_id"), member)
+        share = get_item_cost(data.get("tab_id"), data.get("item_id")) / len(members_to_update)
+        update_member_share(data.get("tab_id"), member, share)
 
 # ASGI app to mount into FastAPI
 socket_app = socketio.ASGIApp(sio)
