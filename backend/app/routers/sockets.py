@@ -35,6 +35,7 @@ async def connect(sid, environ):
         "submitted": False,
         "share": 0.0
     } 
+    print(f"Member id {member_id} connected to tab {code} and is the owner: {is_owner}")
     if (is_owner == "false"): 
         member_id = add_member_to_tab(code, member)
         await sio.emit("member_registered", {"member_id": member_id}, to=sid)
