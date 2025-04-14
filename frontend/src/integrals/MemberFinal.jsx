@@ -13,19 +13,27 @@ const MemberFinal = () => {
   const [amount, setAmount] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState(null);
 
-  const paymentComplete = () => {
+  const paymentComplete = async () => {
     const code = searchParams.get("code");
     if (!code) {
       navigate("/");
     }
-    axiosClient
-      .post(`/tabs/mark_paid/${code}/${user.memberId}`)
-      .then((response) => {
-        alert("Thank you!");
-      })
-      .catch((error) => {
-        alert("Something went wrong", error);
-      });
+    const response = await axiosClient.post(`/stripe/create-checkout-session`, {
+      "item_name": "Clear your Splab share",
+      "amount": amount,
+      "tab_id": code,
+      "member_id": user.memberId,
+    });
+    console.log("Stripe API create checkout session response ", response.data);
+    window.location.href = response.data.url;
+    // axiosClient
+    //   .post(`/tabs/mark_paid/${code}/${user.memberId}`)
+    //   .then((response) => {
+    //     alert("Thank you!");
+    //   })
+    //   .catch((error) => {
+    //     alert("Something went wrong", error);
+    //   });
   };
 
   useEffect(() => {
@@ -70,7 +78,7 @@ const MemberFinal = () => {
           onClick={paymentComplete}
           className="mt-8 px-6 py-3 bg-[var(--primary)] text-white rounded-full shadow-md hover:opacity-90 transition text-sm font-semibold btn-pressable"
         >
-          Done
+          Settle Up
         </button>
       </div>
     </div>
