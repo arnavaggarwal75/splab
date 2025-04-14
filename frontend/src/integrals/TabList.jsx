@@ -8,6 +8,7 @@ import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
 import { RotatingLines } from "react-loader-spinner";
 import { useUser } from "../contexts/UserContext";
+import logo from "../assets/logo.png";
 
 function TabList() {
   let [searchParams] = useSearchParams();
@@ -21,6 +22,7 @@ function TabList() {
   const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isWaiting, setIsWaiting] = useState(false);
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
@@ -38,12 +40,12 @@ function TabList() {
   };
 
   const handleSubmit = () => {
+    setIsWaiting(true);
     currentSocketRef.current.emit("submit", {
       tab_id: searchParams.get("code"),
       member_id: user.memberId,
       tip: tip,
     });
-    alert("Submitted! Please wait for everyone to submit.");
   };
 
   useEffect(() => {
@@ -172,7 +174,9 @@ function TabList() {
 
   return (
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">
-      <h1 className="mt-3 text-lg font-bold">{user.isOwner ? "Your Tab" : ownerName + "'s Tab"}</h1>
+      <h1 className="mt-3 text-lg font-bold">
+        {user.isOwner ? "Your Tab" : ownerName + "'s Tab"}
+      </h1>
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
       {members.length > 0 && <AvatarCircles members={members} />}
@@ -226,6 +230,18 @@ function TabList() {
           </button>
         </div>
       </div>
+      {isWaiting && (
+        <div className="absolute top-0 left-0 w-full h-full bg-white/20 backdrop-blur-md z-50 flex flex-col items-center justify-center">
+          <img
+            src={logo}
+            className="w-20 h-20 mb-4 animate-bounce"
+            alt="Waiting"
+          />
+          <p className="text-lg font-semibold text-gray-700">
+            Waiting for everyone to submit...
+          </p>
+        </div>
+      )}
     </div>
   );
 }
