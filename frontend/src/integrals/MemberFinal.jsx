@@ -21,7 +21,7 @@ const MemberFinal = () => {
     axiosClient
       .post(`/tabs/mark_paid/${code}/${user.memberId}`)
       .then((response) => {
-        alert("Thank you!");
+        navigate("/member-success?code=" + code + "&member_id=" + user.memberId);
       })
       .catch((error) => {
         alert("Something went wrong", error);

@@ -8,6 +8,7 @@ import ConfirmUpload from "./integrals/ConfirmUpload";
 import MemberHome from "./integrals/MemberHome";
 import GetLink from "./integrals/GetLink";
 import OwnerFinal from "./integrals/OwnerFinal";
+import MemberSuccess from "./integrals/MemberSuccess";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/confirm-upload" element={<ConfirmUpload />} />
           <Route path="/member-home" element={<MemberHome />} /> 
           <Route path="/get-link" element={<GetLink />} />
+          <Route path="/member-success" element={<MemberSuccess />} />
         </Routes>
       </BrowserRouter>
     </div>
