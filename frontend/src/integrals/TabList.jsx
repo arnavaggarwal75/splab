@@ -113,7 +113,7 @@ function TabList() {
       if (user.isOwner) {
         navigate("/owner-final?code=" + code);
       } else {
-        navigate(`/member-final?code=${code}&memberId=${user.memberId}`);
+        navigate(`/member-final?code=${code}`);
       }
     });
   }, [currentSocketRef.current, user.memberId, user.isOwner]);

@@ -7,7 +7,7 @@ import BillItem from "../components/BillItem";
 
 function ConfirmUpload() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { user, setUser } = useUser();
 
   const [items, setItems] = useState(null);
