@@ -107,15 +107,24 @@ function TabList() {
   useEffect(() => {
     const socket = currentSocketRef.current;
     if (!socket) return;
-    const code = searchParams.get("code");
-    socket.on("all_submitted", () => {
+    
+    const handleAllSubmitted = () => {
+      const code = searchParams.get("code");
       console.log("🎉 All submitted!");
-      if (user.isOwner) {
-        navigate("/owner-final?code=" + code);
-      } else {
-        navigate(`/member-final?code=${code}`);
-      }
-    });
+      setTimeout(() => {
+        if (user.isOwner) {
+          navigate(`/owner-final?code=${code}`);
+        } else {
+          navigate(`/member-final?code=${code}`);
+        }
+      }, 0);
+    };
+
+    socket.on("all_submitted", handleAllSubmitted);
+
+    return () => {
+      socket.off("all_submitted", handleAllSubmitted);
+    };
   }, [currentSocketRef.current, user.memberId, user.isOwner]);
 
   useEffect(() => {
@@ -196,7 +205,9 @@ function TabList() {
               isChecked={!!checkedItems[item.id]}
               handleCheckbox={() => handleCheckbox(item.id)}
               checkedBy={
-                item.members ? item.members.map((member) => getFirstName(member.name)) : []
+                item.members
+                  ? item.members.map((member) => getFirstName(member.name))
+                  : []
               }
             />
           ))

@@ -6,8 +6,8 @@ import logo from "../assets/logo.png";
 
 const MemberSuccess = () => {
   const [searchParams] = useSearchParams();
-  const tabId = searchParams.get("tab_id");
-  const memberId = searchParams.get("member_id");
+  const tabId = searchParams.get("code");
+  const memberId = searchParams.get("memberId");
 
   useEffect(() => {
     confetti({
@@ -15,9 +15,13 @@ const MemberSuccess = () => {
       spread: 70,
       origin: { y: 0.6 }
     });
+    console.log("🎉 Confetti!");
+    console.log("Tab ID:", tabId);
+    console.log("Member ID:", memberId);
     if (tabId && memberId) {
+        console.log("✅ Marking paid");
       axiosClient
-        .post(`/tabs/${tabId}/members/${memberId}/mark_paid`)
+        .post(`/tabs/mark_paid/${tabId}/${memberId}`)
         .then(() => console.log("✅ Marked paid"))
         .catch((err) => console.error("❌ Error marking paid", err));
     }

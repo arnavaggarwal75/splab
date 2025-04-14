@@ -56,8 +56,8 @@ async def connect(sid, environ):
 
 @sio.event
 async def disconnect(sid):
-    tab_id, member_id = sid_associations[sid]
-    remove_member_from_tab(tab_id, member_id)
+    # tab_id, member_id = sid_associations[sid]
+    # remove_member_from_tab(tab_id, member_id)
     del sid_associations[sid]
     print(f"[Socket.IO] Client disconnected: {sid}")
 

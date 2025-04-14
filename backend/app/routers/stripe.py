@@ -30,7 +30,7 @@ async def create_checkout_session(request: Request):
                 }
             ],
             mode="payment",
-            success_url="http://localhost:5173/member-final?code=" + data["tab_id"],
+            success_url="http://localhost:5173/member-success?code=" + data["tab_id"] + "&memberId=" + data["member_id"],
             cancel_url="http://localhost:5173/member-final?code=" + data["tab_id"],
             metadata={
                 "tab_id": data["tab_id"],
