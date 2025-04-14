@@ -17,7 +17,7 @@ from app.db import (
 # Create a Socket.IO server instance
 sio = socketio.AsyncServer(
     async_mode='asgi',
-    cors_allowed_origins=["http://localhost:5173"]
+    cors_allowed_origins=["http://localhost:5173", "http://10.20.89.2:5173"]
 )
 
 sid_associations = {}
