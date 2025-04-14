@@ -26,33 +26,11 @@ sid_associations = {}
 async def connect(sid, environ):
     query_string = environ.get('QUERY_STRING', '')
     params = parse_qs(query_string)
-    code = params.get('code', [None])[0]
-    member_name = params.get('memberName', [None])[0]
-    is_owner = params.get('isOwner', [None])[0]
-    member_id = params.get('memberId', [None])[0]
-    payment_info = params.get('paymentInfo', [None])[0]
-    member : dict = {
-        "name": member_name,
-        "paid": False,
-        "submitted": False,
-        "share": 0.0
-    } 
-    print(f"Member id {member_id} connected to tab {code} and is the owner: {is_owner}")
-    if (is_owner == "false"): 
-        member_id = add_member_to_tab(code, member)
-        await sio.emit("member_registered", {"member_id": member_id}, to=sid)
-    elif (is_owner == "true" and not member_exists(code, member_id)):
-        member : dict = {
-            "name": member_name,
-            "payment_info": payment_info,
-            "submitted": False,
-            "share": 0.0
-        }
-        member_id = add_member_to_tab(code, member)
-        print("Readding owner to the tab")
-        await sio.emit("member_registered", {"member_id": member_id}, to=sid)
-    sid_associations[sid] = (code, member_id)
-    await sio.enter_room(sid, code) 
+    tab_id = params.get('tab_id', [None])[0]
+    member_id = params.get('member_id', [None])[0] 
+    print(f"Member id {member_id} connected to socket for tab {tab_id}")
+    sid_associations[sid] = (tab_id, member_id)
+    await sio.enter_room(sid, tab_id) 
 
 @sio.event
 async def disconnect(sid):
