@@ -3,8 +3,6 @@ import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { useSearchParams } from "react-router-dom";
-import { db } from "../../firebase";
-import { doc, getDoc } from "firebase/firestore";
 import axiosClient from "../api/axiosClient";
 import { RotatingLines } from "react-loader-spinner";
 

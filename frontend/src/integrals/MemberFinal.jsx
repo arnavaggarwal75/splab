@@ -6,7 +6,7 @@ import { useUser } from "../contexts/UserContext";
 import axiosClient from "../api/axiosClient";
 
 const MemberFinal = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useUser();
 

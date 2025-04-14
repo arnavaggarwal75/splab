@@ -24,6 +24,10 @@ function TabList() {
   const [isLoading, setIsLoading] = useState(true);
   const [isWaiting, setIsWaiting] = useState(false);
 
+  const getFirstName = (name) => {
+    return name.split(" ")[0];
+  };
+
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
     setCheckedItems((prev) => ({
@@ -192,7 +196,7 @@ function TabList() {
               isChecked={!!checkedItems[item.id]}
               handleCheckbox={() => handleCheckbox(item.id)}
               checkedBy={
-                item.members ? item.members.map((member) => member.name) : []
+                item.members ? item.members.map((member) => getFirstName(member.name)) : []
               }
             />
           ))
