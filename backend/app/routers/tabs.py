@@ -7,7 +7,8 @@ from app.db import (
     get_member_share,
     get_members_in_tab,
     get_payment_info,
-    get_tab
+    get_tab,
+    add_member_to_tab,
 )
 from fastapi.responses import JSONResponse
 
@@ -37,6 +38,35 @@ async def create_tab_api(request: Request):
         status_code=status.HTTP_201_CREATED,
         content={"tab_id": tab_id, "member_id": member_id}
     )
+
+@router.post("/add_member")
+async def add_member_to_tab_api(request: Request):
+    body: dict = await request.json()
+    tab_id = body.get("tab_id")
+    name = body.get("name")
+    is_owner = body.get("is_owner")
+    if is_owner:
+        payment_info = body.get("payment_info")
+        member : dict = {
+            "name": name,
+            "payment_info": payment_info,
+            "submitted": False,
+            "share": 0.0
+        }
+        member_id = add_member_to_tab(tab_id, member)
+    else:
+        member: dict = {
+            "name": name,
+            "paid": False,
+            "submitted": False,
+            "share": 0.0
+        }
+        member_id = add_member_to_tab(tab_id, member)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"member_id": member_id}
+    )
+
 
 @router.get("/{tab_id}")
 async def get_tab_items_api(tab_id: str):
