@@ -3,3 +3,4 @@ __pycache__/
 .python-version
 serviceAccountKey.json
 receipt_model/
+.env
