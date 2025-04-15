@@ -282,7 +282,7 @@ function TabList() {
       <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 shadow-xl">
         <div className="flex justify-center py-2">
           <span className="text-black text-lg font-semibold">
-            You owe: ${share}
+            You owe: ${(Math.round(share * 100) / 100).toFixed(2)}
           </span>
         </div>
         <div className="flex items-center justify-evenly px-6 py-4">
