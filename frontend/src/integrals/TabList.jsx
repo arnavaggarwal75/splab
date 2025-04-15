@@ -22,7 +22,7 @@ function TabList() {
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState(null);
   const [ownerName, setOwnerName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isWaiting, setIsWaiting] = useState(false);
@@ -67,40 +67,42 @@ function TabList() {
       const tabId = localStorage.getItem("tabId");
       if (tabId == code) {
         const memberId = localStorage.getItem("memberId");
-        const response = await axiosClient.get(`/tabs/${code}/members/${memberId}`);
+        const response = await axiosClient.get(
+          `/tabs/${code}/members/${memberId}`
+        );
         const member = response.data.member;
         console.log(member);
-        setUser(prev => ({
+        setUser((prev) => ({
           ...prev,
           name: member.name,
           paymentInfo: member.payment_info,
           isOwner: member.is_owner,
-        }))
+        }));
         return memberId;
       }
       return user.memberId;
-    }
+    };
 
     const joinTab = async () => {
       console.log("Joining tab");
-      const response = await axiosClient.post('/tabs/add_member', {
+      const response = await axiosClient.post("/tabs/add_member", {
         tab_id: code,
         name: user.name,
         is_owner: user.isOwner,
-        payment_info: user.paymentInfo
+        payment_info: user.paymentInfo,
       });
       const memberId = response.data.member_id;
       localStorage.setItem("memberId", memberId);
       localStorage.setItem("tabId", code);
       return memberId;
-    }
+    };
 
     const getTabInfo = async (memberId) => {
       // get items + tab info
       axiosClient.get(`/tabs/info/${code}`).then((response) => {
         for (const item of response.data.items) {
           if (item.members == null) continue;
-          if (item.members.some(member => member.id == memberId)) {
+          if (item.members.some((member) => member.id == memberId)) {
             setCheckedItems((prev) => ({
               ...prev,
               [item.id]: true,
@@ -111,15 +113,12 @@ function TabList() {
         setOwnerName(response.data.owner_name);
         setIsLoading(false);
       });
-    }
+    };
 
     const connect = async (memberId) => {
-      console.log("Starting connect", memberId)
+      console.log("Starting connect", memberId);
       // connect to socket
-      connectToSocket(
-        memberId,
-        code,
-      );
+      connectToSocket(memberId, code);
 
       // setup snapshots
       const membersCollectionRef = collection(
@@ -128,13 +127,16 @@ function TabList() {
         searchParams.get("code"),
         "members"
       );
-      const unsubscribeMemberList = onSnapshot(membersCollectionRef, (collectionSnap) => {
-        let membersBuffer = [];
-        collectionSnap.forEach((doc) => {
-          membersBuffer.push(doc.data().name);
-        });
-        setMembers(membersBuffer);
-      });
+      const unsubscribeMemberList = onSnapshot(
+        membersCollectionRef,
+        (collectionSnap) => {
+          let membersBuffer = [];
+          collectionSnap.forEach((member) => {
+            if (member.data().online) membersBuffer.push(member.data().name);
+          });
+          setMembers(membersBuffer);
+        }
+      );
 
       const memberDocRef = doc(
         db,
@@ -167,8 +169,8 @@ function TabList() {
         unsubscribeMemberList();
         unsubscribeShare();
         unsubscribeItems();
-      }
-    }
+      };
+    };
 
     (async () => {
       let memberId = await getMemberId();
@@ -177,7 +179,7 @@ function TabList() {
         joinedTab.current = true;
         memberId = await joinTab(memberId);
       }
-      setUser(prev => ({...prev, memberId}));
+      setUser((prev) => ({ ...prev, memberId }));
       getTabInfo(memberId);
       connect(memberId);
     })();
@@ -218,7 +220,11 @@ function TabList() {
       </h1>
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
-      {members.length > 0 && <AvatarCircles members={members} />}
+      <div
+        className={`h-10 mb-2 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
+      >
+        <AvatarCircles members={members} />
+      </div>
 
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-24">
         {items ? (
@@ -231,7 +237,9 @@ function TabList() {
               isChecked={!!checkedItems[item.id]}
               handleCheckbox={() => handleCheckbox(item.id)}
               checkedBy={
-                item.members ? item.members.map((member) => getFirstName(member.name)) : []
+                item.members
+                  ? item.members.map((member) => getFirstName(member.name))
+                  : []
               }
             />
           ))
