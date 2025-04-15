@@ -14,12 +14,14 @@ function OwnerFinal() {
   const [searchParams] = useSearchParams();
   const tabId = searchParams.get("code");
 
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
 
   useEffect(() => {
     // 2) Call your FastAPI endpoint once on mount to load initial data
+    const memberId = localStorage.getItem('memberId');
+    setUser(prev => ({...prev, memberId}))
     axiosClient
       .get(`/tabs/${tabId}/members`)
       .then((response) => {
@@ -82,7 +84,7 @@ function OwnerFinal() {
               <MemberSplit
                 key={member.id}
                 name={member.name || "Unknown"}
-                share={member.share || 0}
+                share={(Math.round(member.share * 100) / 100).toFixed(2) || 0}
                 submitted={!!member.paid}
               />
             ) : null
