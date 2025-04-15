@@ -21,7 +21,7 @@ const MemberHome = () => {
       alert("Please enter your name");
       return;
     }
-    setUser(prev => ({...prev, name: name, isOwner: false}));
+    setUser(prev => ({...prev, name: name, isOwner: false, joined: true}));
     navigate("/tab-list?code=" + code);
   };
 

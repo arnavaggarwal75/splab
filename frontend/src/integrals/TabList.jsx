@@ -72,9 +72,15 @@ function TabList() {
         );
         const member = response.data.member;
         console.log(member);
+        if (user.joined && member.name !== user.name) {
+          console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
+          axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
+            name: user.name,
+          });
+        }
         setUser((prev) => ({
           ...prev,
-          name: member.name,
+          name: user.joined ? user.name : member.name,
           paymentInfo: member.payment_info,
           isOwner: member.is_owner,
         }));
@@ -221,7 +227,7 @@ function TabList() {
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
       <div
-        className={`h-10 mb-2 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
+        className={`h-10 mb-3 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
       >
         <AvatarCircles members={members} />
       </div>

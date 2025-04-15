@@ -11,6 +11,8 @@ from app.db import (
     add_member_to_tab,
     get_owner_name,
     get_one_member,
+    update_member_name,
+    update_item_members,
 )
 from fastapi.responses import JSONResponse
 
@@ -153,3 +155,26 @@ async def mark_member_paid_api(tab_id: str, member_id: str):
         status_code=200,
         content={"message": f"Member {member_id} in tab {tab_id} marked as paid."}
     )
+
+@router.put("/member_name/{tab_id}/{member_id}")
+async def update_member_name_api(tab_id: str, member_id: str, request: Request):
+    new_name: str = (await request.json()).get("name")
+    member = get_one_member(tab_id, member_id)
+    if member is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Member {member_id} not found in tab {tab_id}"}
+        )
+    else:
+        update_member_name(tab_id, member_id, new_name, member.get("is_owner", False))
+        tab = get_tab(tab_id)
+        for item in tab.get("items", []):
+            members_in_item : list[dict] = item.get("members", [])
+            for member in members_in_item:
+                if member.get("id") == member_id:
+                    member["name"] = new_name
+            update_item_members(tab_id, item["id"], members_in_item)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "Member updated successfully", "member": member}
+        )

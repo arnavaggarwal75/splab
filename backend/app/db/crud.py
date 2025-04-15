@@ -151,3 +151,12 @@ def member_exists(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
     member = tabs_collection.document(tab_id).collection("members").document(member_id).get()
     return member.exists
+
+def update_member_name(tab_id: str, member_id: str, name: str, is_owner: bool):
+    if invalid_tab_id(tab_id): return None
+    if is_owner:
+        tab = tabs_collection.document(tab_id)
+        tab.update({"owner_name": name})
+    member = tabs_collection.document(tab_id).collection("members").document(member_id)
+    member.update({"name": name})
+    return tab_id

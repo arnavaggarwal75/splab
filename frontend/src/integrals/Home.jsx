@@ -34,6 +34,7 @@ function Home() {
         ...prev,
         name,
         isOwner: false,
+        joined: true,
       }));
       navigate(`/tab-list?code=${code}`);
     }
