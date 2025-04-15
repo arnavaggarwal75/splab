@@ -58,7 +58,7 @@ async def add_member_to_tab_api(request: Request):
     else:
         member: dict = {
             "name": name,
-            "is_Owner": is_owner,
+            "is_owner": is_owner,
             "paid": False,
             "submitted": False,
             "share": 0.0,

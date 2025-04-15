@@ -22,7 +22,7 @@ function TabList() {
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
-  const [members, setMembers] = useState(null);
+  const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isWaiting, setIsWaiting] = useState(false);
@@ -56,6 +56,7 @@ function TabList() {
     });
   };
 
+  // initial useEffect
   useEffect(() => {
     const code = searchParams.get("code");
     if (!code) {
@@ -71,7 +72,6 @@ function TabList() {
           `/tabs/${code}/members/${memberId}`
         );
         const member = response.data.member;
-        console.log(member);
         if (user.joined && member.name !== user.name) {
           console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
           axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
@@ -83,15 +83,16 @@ function TabList() {
           name: user.joined ? user.name : member.name,
           paymentInfo: member.payment_info,
           isOwner: member.is_owner,
+          memberId,
         }));
-        return memberId;
+        console.log(member.name, memberId);
+        return false;
       }
-      return user.memberId;
+      return true;
     };
 
     const joinTab = async () => {
       console.log("Joining tab");
-      if(!user.name) navigate(`/member-home?code=${code}`)
       const response = await axiosClient.post("/tabs/add_member", {
         tab_id: code,
         name: user.name,
@@ -101,31 +102,51 @@ function TabList() {
       const memberId = response.data.member_id;
       localStorage.setItem("memberId", memberId);
       localStorage.setItem("tabId", code);
-      return memberId;
+      setUser((prev) => ({ ...prev, memberId }));
     };
+    (async () => {
+      const needToJoin = await getMemberId();
+      if (!joinedTab.current && needToJoin) {
+        joinedTab.current = true;
+        await joinTab();
+      }
+    })();
+  }, []);
 
-    const getTabInfo = async (memberId) => {
+  // useEffect after getting user.memberId
+  useEffect(() => {
+    if(!user.memberId) return;
+    const code = searchParams.get("code");
+    const getTabInfo = async () => {
       // get items + tab info
       axiosClient.get(`/tabs/info/${code}`).then((response) => {
-        for (const item of response.data.items) {
-          if (item.members == null) continue;
-          if (item.members.some((member) => member.id == memberId)) {
+        response.data.items.forEach((item) => {
+          if (item.members == null) return;
+          if (item.members.some((member) => member.id == user.memberId)) {
             setCheckedItems((prev) => ({
               ...prev,
               [item.id]: true,
             }));
           }
-        }
+        })
+
+        setMembers([]);
+        response.data.members.forEach((member) => {
+          if(member.online || member.name == user.name) {
+            setMembers(prev => [...prev, member.name]);
+          }
+        })
+
         setItems(response.data.items);
         setOwnerName(response.data.owner_name);
         setIsLoading(false);
       });
     };
 
-    const connect = async (memberId) => {
-      console.log("Starting connect", memberId);
+    const connect = async () => {
+      console.log("Starting connect", user.memberId);
       // connect to socket
-      connectToSocket(memberId, code);
+      connectToSocket(user.memberId, code);
 
       // setup snapshots
       const membersCollectionRef = collection(
@@ -137,11 +158,13 @@ function TabList() {
       const unsubscribeMemberList = onSnapshot(
         membersCollectionRef,
         (collectionSnap) => {
-          let membersBuffer = [];
+          setMembers([]);
           collectionSnap.forEach((member) => {
-            if (member.data().online) membersBuffer.push(member.data().name);
+            if (member.data().online || member.data().name == user.name) {
+              setMembers(prev => [...prev, member.data().name]);
+              console.log("Adding", member.data().name);
+            }
           });
-          setMembers(membersBuffer);
         }
       );
 
@@ -150,7 +173,7 @@ function TabList() {
         "Tabs",
         searchParams.get("code"),
         "members",
-        memberId
+        user.memberId
       );
       const unsubscribeShare = onSnapshot(memberDocRef, (docSnap) => {
         if (docSnap.exists()) {
@@ -177,21 +200,17 @@ function TabList() {
         unsubscribeShare();
         unsubscribeItems();
       };
-    };
-
+    }
+    getTabInfo();
+    let unsubscribe = () => {};
     (async () => {
-      let memberId = await getMemberId();
-      if (joinedTab.current) return;
-      if (!memberId && !joinedTab.current) {
-        joinedTab.current = true;
-        memberId = await joinTab(memberId);
-      }
-      setUser((prev) => ({ ...prev, memberId }));
-      getTabInfo(memberId);
-      connect(memberId);
+      unsubscribe = await connect();
     })();
-  }, []);
 
+    return unsubscribe;
+  }, [user.memberId]);
+
+  // useEffect for all submitted socket handler
   useEffect(() => {
     const socket = currentSocketRef.current;
     if (!socket) return;
