@@ -74,7 +74,7 @@ function ConfirmUpload() {
             />
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center justify-center min-h-full">
             <RotatingLines
               strokeColor="grey"
               strokeWidth="5"

@@ -54,7 +54,6 @@ function OwnerFinal() {
     axiosClient
       .delete(`/tabs/${tabId}`)
       .then(() => {
-        alert("Tab has been settled and deleted.");
         navigate("/");
       })
       .catch((err) => {
