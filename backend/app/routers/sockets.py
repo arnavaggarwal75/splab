@@ -7,11 +7,10 @@ from app.db import (
     update_member_share,
     get_member_share,
     get_item_cost,
-    add_member_to_tab,
-    remove_member_from_tab,
     get_members_in_tab,
     mark_member_submitted,
-    member_exists
+    member_exists,
+    set_member_online_status,
 )
 
 # Create a Socket.IO server instance
@@ -28,14 +27,19 @@ async def connect(sid, environ):
     params = parse_qs(query_string)
     tab_id = params.get('tab_id', [None])[0]
     member_id = params.get('member_id', [None])[0] 
+    print(f"[Socket.IO] tab_id: {tab_id} member_id: {member_id}")
+    if not member_exists(tab_id, member_id):
+        print(f"A socket connection was attempted with a nonexistant user")
+        return
     print(f"Member id {member_id} connected to socket for tab {tab_id}")
     sid_associations[sid] = (tab_id, member_id)
+    set_member_online_status(tab_id, member_id, True)
     await sio.enter_room(sid, tab_id) 
 
 @sio.event
 async def disconnect(sid):
     tab_id, member_id = sid_associations[sid]
-    remove_member_from_tab(tab_id, member_id)
+    set_member_online_status(tab_id, member_id, False)
     del sid_associations[sid]
     print(f"[Socket.IO] Client disconnected: {sid}")
 

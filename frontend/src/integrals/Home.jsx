@@ -18,21 +18,23 @@ function Home() {
         alert("Please fill all fields");
         return;
       }
-      setUser({
+      setUser(prev => ({
+        ...prev,
         name,
         paymentInfo,
         isOwner: true,
-      });
+      }));
       navigate("/upload");
     } else {
       if (!name || !code) {
         alert("Please fill all fields");
         return;
       }
-      setUser({
+      setUser(prev => ({
+        ...prev,
         name,
         isOwner: false,
-      });
+      }));
       navigate(`/tab-list?code=${code}`);
     }
   };

@@ -9,6 +9,8 @@ from app.db import (
     get_payment_info,
     get_tab,
     add_member_to_tab,
+    get_owner_name,
+    get_one_member,
 )
 from fastapi.responses import JSONResponse
 
@@ -27,16 +29,11 @@ async def create_tab_api(request: Request):
     owner_name: str = body.get("owner_name")
     owner_payment_id: str = body.get("owner_payment_id")
     items: list[dict] = body.get("items")
-    owner: dict = {
-        "name": owner_name,
-        "payment_info": owner_payment_id,
-        "share": 0.0,
-        "submitted": False
-    }
-    tab_id, member_id = create_tab(items, owner, owner_name, owner_payment_id)
+
+    tab_id = create_tab(items, owner_name, owner_payment_id)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content={"tab_id": tab_id, "member_id": member_id}
+        content={"tab_id": tab_id}
     )
 
 @router.post("/add_member")
@@ -50,25 +47,30 @@ async def add_member_to_tab_api(request: Request):
         member : dict = {
             "name": name,
             "payment_info": payment_info,
+            "is_owner": is_owner,
             "submitted": False,
-            "share": 0.0
+            "share": 0.0,
+            "online": False,
         }
         member_id = add_member_to_tab(tab_id, member)
     else:
         member: dict = {
             "name": name,
+            "is_Owner": is_owner,
             "paid": False,
             "submitted": False,
-            "share": 0.0
+            "share": 0.0,
+            "online": False,
         }
         member_id = add_member_to_tab(tab_id, member)
+        print("Member_id", member_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"member_id": member_id}
     )
 
 
-@router.get("/{tab_id}")
+@router.get("/items/{tab_id}")
 async def get_tab_items_api(tab_id: str):
     items: list[dict] = get_items_in_tab(tab_id)
     return JSONResponse(
@@ -82,6 +84,14 @@ async def get_tab_info_api(tab_id: str):
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=response
+    )
+
+@router.get("/{tab_id}/owner_name")
+async def get_owner_name_api(tab_id: str):
+    owner_name: str = get_owner_name(tab_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"owner_name": owner_name}
     )
 
 @router.delete("/{tab_id}")
@@ -110,6 +120,22 @@ async def get_members(tab_id: str):
             status_code=status.HTTP_200_OK,
             content={"members": members}
         )
+
+@router.get("/{tab_id}/members/{member_id}")
+async def get_single_member(tab_id: str, member_id: str):
+    member: dict = get_one_member(tab_id, member_id)
+    print("Member", member)
+    if member is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Error fetching member {member_id} in tab {tab_id}"}
+        )
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"member": member}
+        )
+    
 
 @router.get("/share/{tab_id}/{member_id}")
 async def get_member_share_api(tab_id: str, member_id: str):
