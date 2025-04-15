@@ -17,15 +17,12 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
-  const connectToSocket = (code, isOwner, memberName, memberId, paymentInfo, onRegistered) => {
+  const connectToSocket = (memberId, tabId) => {
     if(!socketRef.current && !attemptConnect.current) {
       socketRef.current = io(import.meta.env.VITE_API_URL, {
         query: {
-          code: code,
-          isOwner: isOwner,
-          memberName: memberName,
-          memberId: memberId,
-          paymentInfo: paymentInfo,
+          tab_id: tabId,
+          member_id: memberId,
         },
         transports: ["websocket"], // Optional: for force WebSocket
         autoConnect: false,

@@ -8,6 +8,7 @@ export function UserProvider({ children }) {
     paymentInfo: "",
     isOwner: false,
     memberId: "",
+    joined: false,
   });
 
   return (

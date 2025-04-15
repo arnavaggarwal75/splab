@@ -17,17 +17,11 @@ const MemberHome = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!name) {
       alert("Please enter your name");
       return;
     }
-
-    setUser({
-      name: name,
-      isOwner: false,
-    });
-
+    setUser(prev => ({...prev, name: name, isOwner: false, joined: true}));
     navigate("/tab-list?code=" + code);
   };
 
@@ -35,11 +29,9 @@ const MemberHome = () => {
     if (!code) {
       navigate("/");
     }
-  }, []);
 
-  useEffect(() => {
     const fetchTab = async () => {
-      const response = await axiosClient.get(`/tabs/info/${code}`);
+      const response = await axiosClient.get(`/tabs/${code}/owner_name`);
       setTabOwner(response.data.owner_name);
       setIsLoading(false);
     };

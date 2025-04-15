@@ -49,16 +49,14 @@ function ConfirmUpload() {
   }, []);
 
   const createTab = () => {
-    axiosClient
-      .post("/tabs/create", {
-        owner_name: user.name,
-        owner_payment_id: user.paymentInfo,
-        items,
-      })
-      .then((response) => {
-        setUser((prev) => ({ ...prev, memberId: response.data.member_id }));
-        navigate(`/get-link?code=${response.data.tab_id}`);
-      });
+    console.log(user.name);
+    axiosClient.post("/tabs/create", {
+      owner_name: user.name,
+      owner_payment_id: user.paymentInfo,
+      items,
+    }).then((response) => {
+      navigate(`/get-link?code=${response.data.tab_id}`);
+    });
   };
 
   return (
