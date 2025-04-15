@@ -162,7 +162,6 @@ function TabList() {
           collectionSnap.forEach((member) => {
             if (member.data().online || member.data().name == user.name) {
               setMembers(prev => [...prev, member.data().name]);
-              console.log("Adding", member.data().name);
             }
           });
         }
