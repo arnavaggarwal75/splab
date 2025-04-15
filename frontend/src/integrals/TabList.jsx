@@ -91,6 +91,7 @@ function TabList() {
 
     const joinTab = async () => {
       console.log("Joining tab");
+      if(!user.name) navigate(`/member-home?code=${code}`)
       const response = await axiosClient.post("/tabs/add_member", {
         tab_id: code,
         name: user.name,
