@@ -13,7 +13,7 @@ const BillItem = ({
 }) => {
   return (
     <div
-      className="btn-pressable flex flex-col gap-2 relative  w-full p-4 bg-gray-300/20 backdrop-blur-sm text-black font-bold rounded-xl shadow-lg border border-gray-300 font-mono"
+      className={`${onclick ? "btn-pressable" : ""} flex flex-col gap-2 relative  w-full p-4 bg-gray-300/20 backdrop-blur-sm text-black font-bold rounded-xl shadow-lg border border-gray-300 font-mono`}
       onClick={onClick}
     >
       <div className="flex items-center">

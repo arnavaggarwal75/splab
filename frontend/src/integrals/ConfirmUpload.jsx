@@ -84,7 +84,7 @@ function ConfirmUpload() {
   };
 
   const handleAddItem = () => {
-    setEditItem({ name: "", price: "" });
+    setEditItem(null);
     setEditIndex(items.length);
     setModalOpen(true);
   };

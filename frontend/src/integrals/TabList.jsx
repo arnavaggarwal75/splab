@@ -251,7 +251,7 @@ function TabList() {
         <AvatarCircles members={members} />
       </div>
 
-      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-24">
+      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pt-2 pb-32">
         {items ? (
           items.map((item, idx) => (
             <BillItem

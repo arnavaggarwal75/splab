@@ -5,9 +5,12 @@ const EditItemModal = ({ isOpen, onClose, onSave, onDelete, item }) => {
   const [price, setPrice] = useState("");
 
   useEffect(() => {
-    setName(item?.name || "");
-    setPrice(item?.price || "");
-  }, [item, name, price]);
+    if (isOpen) {
+      console.log("item: ", item);
+      setName(item?.name || "");
+      setPrice(item?.price?.toString() || "");
+    }
+  }, [isOpen]);
 
   const handleSave = () => {
     if (!name || isNaN(price)) return;
@@ -19,7 +22,9 @@ const EditItemModal = ({ isOpen, onClose, onSave, onDelete, item }) => {
     isOpen && (
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-white w-[85%] rounded-xl p-6 shadow-xl flex flex-col gap-3">
-          <h2 className="text-lg font-bold">{(name === "" || price === "") ? "Add Item" : "Edit Item"}</h2>
+          <h2 className="text-lg font-bold">
+            {!item ? "Add Item" : "Edit Item"}
+          </h2>
 
           <input
             className="p-2 border rounded"
@@ -35,19 +40,21 @@ const EditItemModal = ({ isOpen, onClose, onSave, onDelete, item }) => {
             type="number"
           />
 
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-evenly mt-4">
             <button
               onClick={handleSave}
               className="btn-pressable bg-[var(--primary)] text-white px-4 py-2 rounded-full"
             >
               Save
             </button>
-            <button
-              onClick={onDelete}
-              className="btn-pressable bg-red-500 border text-white px-4 py-2 rounded-full"
-            >
-              Delete
-            </button>
+            {item && (
+              <button
+                onClick={onDelete}
+                className="btn-pressable bg-red-500 border text-white px-4 py-2 rounded-full"
+              >
+                Delete
+              </button>
+            )}
             <button
               onClick={onClose}
               className="btn-pressable bg-gray-300 px-4 py-2 rounded-full"
