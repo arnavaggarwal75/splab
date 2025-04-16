@@ -4,3 +4,4 @@ __pycache__/
 serviceAccountKey.json
 receipt_model/
 .env
+.DS_Store
