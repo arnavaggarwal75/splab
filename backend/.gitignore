@@ -5,3 +5,4 @@ serviceAccountKey.json
 receipt_model/
 .env
 .DS_Store
+*.pyc
