@@ -49,6 +49,7 @@ function ConfirmUpload() {
   }, []);
 
   const createTab = () => {
+    console.log(user.name);
     axiosClient
       .post("/tabs/create", {
         owner_name: user.name,
@@ -60,7 +61,7 @@ function ConfirmUpload() {
         const resp = await axiosClient.post("stripe/onboard", {
           tab_id: response.data.tab_id,
           member_id: response.data.member_id,
-        })
+        });
         window.location.href = resp.data.url;
         // navigate(`/get-link?code=${response.data.tab_id}`);
       });
@@ -81,7 +82,7 @@ function ConfirmUpload() {
             />
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center justify-center min-h-full">
             <RotatingLines
               strokeColor="grey"
               strokeWidth="5"

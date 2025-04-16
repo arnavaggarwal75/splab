@@ -4,14 +4,13 @@ from google.cloud import firestore
 
 tabs_collection = db.collection("Tabs")
 
-def create_tab(items: list[dict], owner: dict, owner_name: str, owner_payment_id: str):
+def create_tab(items: list[dict], owner_name: str, owner_payment_id: str):
     tab_id = generate_unique_tab_id()
     print(f"Creating tab {tab_id}")
     tabs_collection.document(tab_id).set({"tab_id": tab_id, "owner_name": owner_name, "payment_info": owner_payment_id})
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
-    _, owner_ref = tabs_collection.document(tab_id).collection("members").add(owner)
-    return (tab_id, owner_ref.id)
+    return (tab_id)
 
 def get_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
@@ -83,6 +82,12 @@ def add_member_to_tab(tab_id: str, member: dict):
     _, doc_ref = tabs_collection.document(tab_id).collection("members").add(member)
     return doc_ref.id
 
+def set_member_online_status(tab_id: str, member_id: str, status: bool):
+    if invalid_tab_id(tab_id): return None
+    member_ref = tabs_collection.document(tab_id).collection("members").document(member_id)
+    print("status", status)
+    member_ref.update({"online": status})
+
 def remove_member_from_tab(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
     tabs_collection.document(tab_id).collection("members").document(member_id).delete()
@@ -91,6 +96,11 @@ def get_members_in_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
     members = tabs_collection.document(tab_id).collection("members").get()
     return [{"id": member.id, **member.to_dict()} for member in members] if members else None
+
+def get_one_member(tab_id: str, member_id: str):
+    if invalid_tab_id(tab_id): return None
+    member_doc = tabs_collection.document(tab_id).collection("members").document(member_id).get()
+    return member_doc.to_dict()
 
 def mark_member_submitted(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
@@ -132,6 +142,11 @@ def get_payment_info(tab_id: str):
         return tab.to_dict().get("payment_info", 0)
     return 0
 
+def get_owner_name(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id).get()
+    return tab.to_dict().get("owner_name", "")
+
 def member_exists(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None
     member = tabs_collection.document(tab_id).collection("members").document(member_id).get()
@@ -149,3 +164,12 @@ def get_stripe_account_id(tab_id: str):
     if invalid_tab_id(tab_id): return None
     tab = tabs_collection.document(tab_id).get()
     return tab.to_dict().get("owner_stripe_id", 0)
+
+def update_member_name(tab_id: str, member_id: str, name: str, is_owner: bool):
+    if invalid_tab_id(tab_id): return None
+    if is_owner:
+        tab = tabs_collection.document(tab_id)
+        tab.update({"owner_name": name})
+    member = tabs_collection.document(tab_id).collection("members").document(member_id)
+    member.update({"name": name})
+    return tab_id

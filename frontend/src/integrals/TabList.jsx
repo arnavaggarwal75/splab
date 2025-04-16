@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSocket } from "../contexts/SocketContext";
 import axiosClient from "../api/axiosClient";
@@ -13,8 +13,11 @@ import logo from "../assets/logo.png";
 function TabList() {
   let [searchParams] = useSearchParams();
   let navigate = useNavigate();
+
   const { currentSocketRef, connectToSocket } = useSocket();
   const { user, setUser } = useUser();
+  const joinedTab = useRef(false);
+
   const [items, setItems] = useState([]);
   const [checkedItems, setCheckedItems] = useState({});
   const [tip, setTip] = useState("");
@@ -30,6 +33,7 @@ function TabList() {
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
+    console.log(checkedItems);
     setCheckedItems((prev) => ({
       ...prev,
       [index]: !prev[index],
@@ -52,58 +56,160 @@ function TabList() {
     });
   };
 
+  // initial useEffect
   useEffect(() => {
     const code = searchParams.get("code");
-    if (!code || user.name === "") {
+    if (!code) {
       navigate("/");
       return;
     }
 
-    // get items
-    axiosClient.get(`/tabs/${code}`).then((response) => {
-      console.log(response);
-      setItems(response.data.items);
-    });
-
-    axiosClient.get(`/tabs/info/${code}`).then((response) => {
-      setOwnerName(response.data.owner_name);
-      setIsLoading(false);
-    });
-
-    // connect to socket
-    connectToSocket(
-      code,
-      user.isOwner,
-      user.name,
-      user.memberId,
-      user.paymentInfo,
-      (newMemberId) => {
-        console.log("newMemberId", newMemberId);
-        setUser({ ...user, memberId: newMemberId });
+    const getMemberId = async () => {
+      const tabId = localStorage.getItem("tabId");
+      if (tabId == code) {
+        const memberId = localStorage.getItem("memberId");
+        const response = await axiosClient.get(
+          `/tabs/${code}/members/${memberId}`
+        );
+        const member = response.data.member;
+        if (user.joined && member.name !== user.name) {
+          console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
+          axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
+            name: user.name,
+          });
+        }
+        setUser((prev) => ({
+          ...prev,
+          name: user.joined ? user.name : member.name,
+          paymentInfo: member.payment_info,
+          isOwner: member.is_owner,
+          memberId,
+        }));
+        console.log(member.name, memberId);
+        return false;
       }
-    );
-    axiosClient.get(`/tabs/${code}`).then((response) => {
-      console.log(response);
-      setItems(response.data.items);
-    });
+      return true;
+    };
 
-    // get list of online members
-    const membersCollectionRef = collection(
-      db,
-      "Tabs",
-      searchParams.get("code"),
-      "members"
-    );
-    const unsubscribe = onSnapshot(membersCollectionRef, (collectionSnap) => {
-      let membersBuffer = [];
-      collectionSnap.forEach((doc) => {
-        membersBuffer.push(doc.data().name);
+    const joinTab = async () => {
+      console.log("Joining tab");
+      const response = await axiosClient.post("/tabs/add_member", {
+        tab_id: code,
+        name: user.name,
+        is_owner: user.isOwner,
+        payment_info: user.paymentInfo,
       });
-      setMembers(membersBuffer);
-    });
-    return () => unsubscribe();
+      const memberId = response.data.member_id;
+      localStorage.setItem("memberId", memberId);
+      localStorage.setItem("tabId", code);
+      setUser((prev) => ({ ...prev, memberId }));
+    };
+    (async () => {
+      const needToJoin = await getMemberId();
+      if (!joinedTab.current && needToJoin) {
+        joinedTab.current = true;
+        await joinTab();
+      }
+    })();
   }, []);
 
+  // useEffect after getting user.memberId
+  useEffect(() => {
+    if(!user.memberId) return;
+    const code = searchParams.get("code");
+    const getTabInfo = async () => {
+      // get items + tab info
+      axiosClient.get(`/tabs/info/${code}`).then((response) => {
+        response.data.items.forEach((item) => {
+          if (item.members == null) return;
+          if (item.members.some((member) => member.id == user.memberId)) {
+            setCheckedItems((prev) => ({
+              ...prev,
+              [item.id]: true,
+            }));
+          }
+        })
+
+        setMembers([]);
+        response.data.members.forEach((member) => {
+          if(member.online || member.name == user.name) {
+            setMembers(prev => [...prev, member.name]);
+          }
+        })
+
+        setItems(response.data.items);
+        setOwnerName(response.data.owner_name);
+        setIsLoading(false);
+      });
+    };
+
+    const connect = async () => {
+      console.log("Starting connect", user.memberId);
+      // connect to socket
+      connectToSocket(user.memberId, code);
+
+      // setup snapshots
+      const membersCollectionRef = collection(
+        db,
+        "Tabs",
+        searchParams.get("code"),
+        "members"
+      );
+      const unsubscribeMemberList = onSnapshot(
+        membersCollectionRef,
+        (collectionSnap) => {
+          setMembers([]);
+          collectionSnap.forEach((member) => {
+            if (member.data().online || member.data().name == user.name) {
+              setMembers(prev => [...prev, member.data().name]);
+            }
+          });
+        }
+      );
+
+      const memberDocRef = doc(
+        db,
+        "Tabs",
+        searchParams.get("code"),
+        "members",
+        user.memberId
+      );
+      const unsubscribeShare = onSnapshot(memberDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.share !== undefined) {
+            setShare(data.share);
+          }
+        } else {
+          console.warn("Member document not found");
+        }
+      });
+
+      const itemsCollectionRef = collection(db, "Tabs", code, "items");
+      const unsubscribeItems = onSnapshot(itemsCollectionRef, (snapshot) => {
+        const updatedItems = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setItems(updatedItems);
+      });
+
+      return () => {
+        unsubscribeMemberList();
+        unsubscribeShare();
+        unsubscribeItems();
+      };
+    }
+    getTabInfo();
+    let unsubscribe = () => {};
+    (async () => {
+      unsubscribe = await connect();
+    })();
+
+    return unsubscribe;
+  }, [user.memberId]);
+
+  // useEffect for all submitted socket handler
   useEffect(() => {
     const socket = currentSocketRef.current;
     if (!socket) return;
@@ -127,50 +233,6 @@ function TabList() {
     };
   }, [currentSocketRef.current, user.memberId, user.isOwner]);
 
-  useEffect(() => {
-    if (user.memberId === undefined) return;
-    const memberDocRef = doc(
-      db,
-      "Tabs",
-      searchParams.get("code"),
-      "members",
-      user.memberId
-    );
-    console.log("userid", user.memberId);
-    const unsubscribe = onSnapshot(memberDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.share !== undefined) {
-          setShare(data.share);
-        }
-      } else {
-        console.warn("Member document not found");
-      }
-    });
-    return () => unsubscribe();
-  }, [user.memberId]);
-
-  useEffect(() => {
-    const code = searchParams.get("code");
-    if (!code) return;
-
-    const itemsCollectionRef = collection(db, "Tabs", code, "items");
-    console.log("itemsCollectionRef", itemsCollectionRef);
-    const unsubscribe = onSnapshot(itemsCollectionRef, (snapshot) => {
-      const updatedItems = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setItems(updatedItems);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    console.log("items", items);
-  }, [items]);
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -192,7 +254,11 @@ function TabList() {
       </h1>
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
-      {members.length > 0 && <AvatarCircles members={members} />}
+      <div
+        className={`h-10 mb-3 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
+      >
+        <AvatarCircles members={members} />
+      </div>
 
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-24">
         {items ? (
@@ -225,7 +291,7 @@ function TabList() {
       <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 shadow-xl">
         <div className="flex justify-center py-2">
           <span className="text-black text-lg font-semibold">
-            You owe: ${share}
+            You owe: ${(Math.round(share * 100) / 100).toFixed(2)}
           </span>
         </div>
         <div className="flex items-center justify-evenly px-6 py-4">
