@@ -4,12 +4,15 @@ import { RotatingLines } from "react-loader-spinner";
 import axiosClient from "../api/axiosClient";
 import { useUser } from "../contexts/UserContext";
 import BillItem from "../components/BillItem";
+import EditItemModal from "../components/EditItemModal";
 
 function ConfirmUpload() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, setUser } = useUser();
-
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+  const [editItem, setEditItem] = useState(null);
   const [items, setItems] = useState(null);
 
   useEffect(() => {
@@ -50,13 +53,40 @@ function ConfirmUpload() {
 
   const createTab = () => {
     console.log(user.name);
-    axiosClient.post("/tabs/create", {
-      owner_name: user.name,
-      owner_payment_id: user.paymentInfo,
-      items,
-    }).then((response) => {
-      navigate(`/get-link?code=${response.data.tab_id}`);
-    });
+    axiosClient
+      .post("/tabs/create", {
+        owner_name: user.name,
+        owner_payment_id: user.paymentInfo,
+        items,
+      })
+      .then((response) => {
+        navigate(`/get-link?code=${response.data.tab_id}`);
+      });
+  };
+
+  const openEditModal = (item, index) => {
+    setEditItem(item);
+    setEditIndex(index);
+    setModalOpen(true);
+  };
+
+  const handleSaveItem = (updatedItem) => {
+    const updated = [...items];
+    updated[editIndex] = updatedItem;
+    setItems(updated);
+  };
+
+  const handleDeleteItem = () => {
+    const updated = [...items];
+    updated.splice(editIndex, 1);
+    setItems(updated);
+    setModalOpen(false);
+  };
+
+  const handleAddItem = () => {
+    setEditItem(null);
+    setEditIndex(items.length);
+    setModalOpen(true);
   };
 
   return (
@@ -71,6 +101,7 @@ function ConfirmUpload() {
               name={item.name}
               price={item.price}
               checkboxDisabled
+              onClick={() => openEditModal(item, index)}
             />
           ))
         ) : (
@@ -85,6 +116,12 @@ function ConfirmUpload() {
           </div>
         )}
       </div>
+      <button
+        onClick={handleAddItem}
+        className="btn-pressable fixed bottom-23 right-4 bg-[var(--primary)] text-white w-12 h-12 rounded-full text-2xl shadow-md z-50"
+      >
+        +
+      </button>
       <div className="fixed bottom-0 flex justify-evenly px-6 py-4 shadow-xl items-center bg-white/70 backdrop-blur-md border-t border-gray-300 w-full">
         <button
           onClick={() => navigate("/upload")}
@@ -99,6 +136,13 @@ function ConfirmUpload() {
           Proceed
         </button>
       </div>
+      <EditItemModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveItem}
+        onDelete={handleDeleteItem}
+        item={editItem}
+      />
     </div>
   );
 }
