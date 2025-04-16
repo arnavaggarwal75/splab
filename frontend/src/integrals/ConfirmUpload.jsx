@@ -58,12 +58,10 @@ function ConfirmUpload() {
       })
       .then(async (response) => {
         setUser((prev) => ({ ...prev, memberId: response.data.member_id }));
-        const resp = await axiosClient.post("stripe/onboard", {
-          tab_id: response.data.tab_id,
-          member_id: response.data.member_id,
-        });
-        window.location.href = resp.data.url;
-        // navigate(`/get-link?code=${response.data.tab_id}`);
+        // const resp = await axiosClient.post("stripe/onboard", {
+        //   tab_id: response.data.tab_id,
+        // });
+        navigate("/stripe-onboarding?code=" + response.data.tab_id);
       });
   };
 

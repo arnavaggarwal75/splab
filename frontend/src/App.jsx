@@ -9,6 +9,7 @@ import MemberHome from "./integrals/MemberHome";
 import GetLink from "./integrals/GetLink";
 import OwnerFinal from "./integrals/OwnerFinal";
 import MemberSuccess from "./integrals/MemberSuccess";
+import StripeOnboarding from "./integrals/StripeOnboarding";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/member-home" element={<MemberHome />} /> 
           <Route path="/get-link" element={<GetLink />} />
           <Route path="/member-success" element={<MemberSuccess />} />
+          <Route path="/stripe-onboarding" element={<StripeOnboarding />} />
         </Routes>
       </BrowserRouter>
     </div>

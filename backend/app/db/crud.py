@@ -152,12 +152,10 @@ def member_exists(tab_id: str, member_id: str):
     member = tabs_collection.document(tab_id).collection("members").document(member_id).get()
     return member.exists
 
-def set_stripe_account_id(tab_id: str, member_id: str, stripe_account_id: str):
+def set_stripe_account_id(tab_id: str, stripe_account_id: str):
     if invalid_tab_id(tab_id): return None
     tab = tabs_collection.document(tab_id)
     tab.update({"owner_stripe_id": stripe_account_id})
-    member = tabs_collection.document(tab_id).collection("members").document(member_id)
-    member.update({"stripe_account_id": stripe_account_id})
     return tab_id
 
 def get_stripe_account_id(tab_id: str):

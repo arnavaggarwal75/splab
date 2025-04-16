@@ -54,18 +54,21 @@ async def create_checkout_session(request: Request):
 async def create_account_link(request: Request):
     data = await request.json()
     tab_id = data.get("tab_id")
-    member_id = data.get("member_id")  # You can pass this from frontend to track
     account = stripe.Account.create(type="express", country="US",  
                                     capabilities={"transfers": {"requested": True}}, 
                                     business_type="individual",
                                     business_profile={
-                                        "product_description": "Splitting the tab with friends at restaurants",
+                                        "product_description": "Splitting the tab with friends",
                                     })
-    account_link = stripe.AccountLink.create(
+    set_stripe_account_id(tab_id, account.id)
+    session = stripe.AccountSession.create(
         account=account.id,
-        refresh_url="http://localhost:5173/",
-        return_url=f"http://localhost:5173/get-link?code={tab_id}",
-        type="account_onboarding",
+        components={
+            "account_onboarding": {
+                "enabled": True,
+                "features": {"external_account_collection": True}
+            }
+        }
     )
-    set_stripe_account_id(tab_id, member_id, account.id)
-    return JSONResponse({"url": account_link.url, "account_id": account.id})
+    return JSONResponse({"account_id": account.id,
+                         "client_secret": session.client_secret})
