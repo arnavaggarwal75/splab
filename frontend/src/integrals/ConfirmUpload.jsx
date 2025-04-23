@@ -64,6 +64,7 @@ function ConfirmUpload() {
         owner_name: user.name,
         owner_payment_id: user.paymentInfo,
         items,
+        tax,
       })
       .then((response) => {
         navigate(`/get-link?code=${response.data.tab_id}`);

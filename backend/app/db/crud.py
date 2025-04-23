@@ -4,10 +4,10 @@ from google.cloud import firestore
 
 tabs_collection = db.collection("Tabs")
 
-def create_tab(items: list[dict], owner_name: str, owner_payment_id: str):
+def create_tab(items: list[dict], owner_name: str, owner_payment_id: str, tax: float):
     tab_id = generate_unique_tab_id()
     print(f"Creating tab {tab_id}")
-    tabs_collection.document(tab_id).set({"tab_id": tab_id, "owner_name": owner_name, "payment_info": owner_payment_id})
+    tabs_collection.document(tab_id).set({"tab_id": tab_id, "owner_name": owner_name, "payment_info": owner_payment_id, "tax": tax})
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
     return (tab_id)

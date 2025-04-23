@@ -30,9 +30,10 @@ async def create_tab_api(request: Request):
     body: dict = await request.json()
     owner_name: str = body.get("owner_name")
     owner_payment_id: str = body.get("owner_payment_id")
+    tax: float = body.get("tax")
     items: list[dict] = body.get("items")
 
-    tab_id = create_tab(items, owner_name, owner_payment_id)
+    tab_id = create_tab(items, owner_name, owner_payment_id, tax)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"tab_id": tab_id}
