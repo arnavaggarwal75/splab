@@ -23,20 +23,23 @@ const EditItemModal = ({ isOpen, onClose, onSave, onDelete, item }) => {
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
         <div className="bg-white w-[85%] rounded-xl p-6 shadow-xl flex flex-col gap-3">
           <h2 className="text-lg font-bold">
-            {!item ? "Add Item" : "Edit Item"}
+            {!item ? "Add Item" : `Edit ${item.name}`}
           </h2>
 
-          <input
-            className="p-2 border rounded"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Item name"
-          />
+          {item?.name !== "Tax" ? 
+            <input
+              className="p-2 border rounded"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Item name"
+            /> : <div/>
+          }
+          
           <input
             className="p-2 border rounded"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            placeholder="Price"
+            placeholder={item?.name !== "Tax" ? "Price" : "Tax"}
             type="number"
           />
 
@@ -47,7 +50,7 @@ const EditItemModal = ({ isOpen, onClose, onSave, onDelete, item }) => {
             >
               Save
             </button>
-            {item && (
+            {(item && item.name !== "Tax") && (
               <button
                 onClick={onDelete}
                 className="btn-pressable bg-red-500 border text-white px-4 py-2 rounded-full"
