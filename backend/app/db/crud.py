@@ -13,6 +13,7 @@ def create_tab(items: list[dict], owner_name: str, owner_payment_id: str, tax: f
         "payment_info": owner_payment_id,
         "tax": tax,
         "subtotal": subtotal,
+        "total_tip": 0.0,
     })
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
@@ -47,6 +48,12 @@ def get_items_in_tab(tab_id: str):
     items = tabs_collection.document(tab_id).collection("items").get()
     return [{"id": item.id, **item.to_dict()} for item in items] if items else None
 
+def get_bill_summary(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id).get().to_dict()
+    needed_keys = ["subtotal", "total_tip", "tax"]
+    return {k: v for k, v in tab.items() if k in needed_keys}
+
 def get_subtotal(tab_id: str):
     if invalid_tab_id(tab_id): return None
     tab = tabs_collection.document(tab_id).get()
@@ -58,6 +65,11 @@ def get_total_tax(tab_id: str):
     tab = tabs_collection.document(tab_id).get()
     tab_data = tab.to_dict() or {}
     return float(tab_data["tax"])
+
+def increase_total_tip(tab_id: str, tip: float):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id)
+    tab.update({"total_tip": firestore.Increment(tip)})
 
 def update_item_members(tab_id: str, item_id: str, members: list[dict]):
     if invalid_tab_id(tab_id): return None

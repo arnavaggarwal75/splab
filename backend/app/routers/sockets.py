@@ -14,6 +14,7 @@ from app.db import (
     get_total_tax,
     get_subtotal,
     update_member_tip,
+    increase_total_tip,
 )
 
 # Create a Socket.IO server instance
@@ -48,13 +49,15 @@ async def disconnect(sid):
 
 @sio.event
 async def submit(sid, data):
-    tab_id, member_id, tip = data.get("tab_id"), data.get("member_id"), data.get("tip") if data.get("tip") != "" else 0
+    tab_id = data.get("tab_id")
+    member_id = data.get("member_id")
+    tip = data.get("tip") if data.get("tip") != "" else 0
+
     mark_member_submitted(tab_id, member_id)
     print(f"[Socket.IO] {sid} finished checking their items.")
-    oldShare = get_member_share(tab_id, member_id)
-    print("old share: ", oldShare, "tip: ", tip, "new share: ", float(oldShare) + float(tip))
-    update_member_share(tab_id, member_id, float(oldShare), -1)
     update_member_tip(tab_id, member_id, tip)
+    increase_total_tip(tab_id, tip)
+
     members = get_members_in_tab(tab_id)    
     allSubmitted = all(member.get("submitted") for member in members)
     if allSubmitted: 
