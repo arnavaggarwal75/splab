@@ -4,13 +4,16 @@ import logo from "../assets/logo.png";
 import { RotatingLines } from "react-loader-spinner";
 import { useUser } from "../contexts/UserContext";
 import axiosClient from "../api/axiosClient";
+import SummaryList from "../components/SummaryList";
 
 const MemberFinal = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useUser();
 
-  const [amount, setAmount] = useState(null);
+  const [tip, setTip] = useState(null);
+  const [tax, setTax] = useState(null);
+  const [subtotal, setSubtotal] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState(null);
 
   const paymentComplete = () => {
@@ -30,11 +33,18 @@ const MemberFinal = () => {
 
   useEffect(() => {
     const code = searchParams.get("code");
+    let memberId = user.memberId;
+    if (!memberId) {
+      memberId = localStorage.getItem("memberId");
+    }
     if (!code) {
       navigate("/");
     }
-    axiosClient.get(`/tabs/share/${code}/${user.memberId}`).then((response) => {
-      setAmount(response.data.share);
+    axiosClient.get(`/tabs/share/${code}/${memberId}`).then((response) => {
+      console.log(response);
+      setTax(response.data.member.tax);
+      setTip(response.data.member.tip);
+      setSubtotal(response.data.member.share);
       setPaymentInfo(response.data.payment_info);
     });
   }, []);
@@ -46,15 +56,19 @@ const MemberFinal = () => {
           src={logo}
           className="w-24 h-24 mb-4 flex items-center justify-center"
         />
-        {amount ? (
-          <div>
+        {subtotal ? (
+          <div className="w-full">
             <p className="text-lg mb-2">Please transfer your share to</p>
-            <div className="mt-2 bg-gray-100 shadow-inner p-2 rounded-2xl text-gray-800 text-md w-full max-w-xs">
+            <div className="my-4 bg-gray-100 shadow-inner p-2 rounded-2xl text-gray-800 text-md w-full max-w-xs">
               {paymentInfo}
             </div>
-
-            <p className="text-lg mt-8">You owe:</p>
-            <p className="text-4xl font-bold mt-2">${amount.toFixed(2)}</p>
+            <SummaryList borderTop borderBottom summary={[
+              { name: "Subtotal", amount: subtotal },
+              { name: "Tax", amount: tax },
+              { name: "Tip", amount: tip },
+            ]}/>
+            <p className="text-lg mt-4">You owe:</p>
+            <p className="text-4xl font-bold mt-2">${parseFloat(subtotal) + parseFloat(tax) + parseFloat(tip)}</p>
           </div>
         ) : (
           <RotatingLines

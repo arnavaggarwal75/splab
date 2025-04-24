@@ -6,6 +6,7 @@ import { useUser } from "../contexts/UserContext";
 import { LiaEdit } from "react-icons/lia";
 import BillItem from "../components/BillItem";
 import EditItemModal from "../components/EditItemModal";
+import SummaryList from "../components/SummaryList";
 
 function ConfirmUpload() {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ function ConfirmUpload() {
         owner_payment_id: user.paymentInfo,
         items,
         tax,
+        subtotal,
       })
       .then((response) => {
         navigate(`/get-link?code=${response.data.tab_id}`);
@@ -89,7 +91,7 @@ function ConfirmUpload() {
       const updated = [...items];
       updated[editIndex] = updatedItem;
       setItems(updated);
-      if(items[editIndex]) {
+      if (items[editIndex]) {
         const diff = updatedItem.price - items[editIndex].price;
         setSubtotal(prev => parseFloat(prev) + parseFloat(diff));
       } else {
@@ -146,24 +148,12 @@ function ConfirmUpload() {
         +
       </button>
       <div className="flex flex-col justify-evenly shadow-xl items-center bg-white/70 backdrop-blur-md w-full">
-        <div className="py-4 border-t border-gray-300 w-full flex flex-col gap-1 items-center">
-          <div className="flex flex-row justify-between w-[80%]">
-            <p>Subtotal:</p>
-            <p className="font-bold">${subtotal}</p>
-          </div>
-          <div className="flex flex-row justify-between w-[80%]">
-            <p>Tax:</p>
-            <div className="relative">
-              <p className="font-bold">${tax}</p>
-              <LiaEdit onClick={() => openEditModal({name: "Tax", price: tax})} className="absolute bottom-[25%] -right-7" />
-            </div>
-          </div>
-          <div className="flex flex-row justify-between w-[80%]">
-            <p>Total:</p>
-            <p className="font-bold">${parseFloat(subtotal) + parseFloat(tax)}</p>
-          </div>
-        </div>
-        <div className="px-6 py-4 flex justify-evenly items-center border-t border-gray-300 w-full">
+        <SummaryList summary={[
+          { name: "Subtotal", amount: subtotal },
+          { name: "Tax", amount: tax },
+          { name: "Total", amount: parseFloat(subtotal) + parseFloat(tax)},
+        ]} />
+        <div className="px-6 py-4 flex justify-evenly items-center w-full">
           <button
             onClick={() => navigate("/upload")}
             className="px-[10%] py-3 bg-[var(--primary)] text-white rounded-full shadow transition btn-pressable"
