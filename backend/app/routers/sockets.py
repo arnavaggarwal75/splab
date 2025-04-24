@@ -11,6 +11,9 @@ from app.db import (
     mark_member_submitted,
     member_exists,
     set_member_online_status,
+    get_total_tax,
+    get_subtotal,
+    update_member_tip,
 )
 
 # Create a Socket.IO server instance
@@ -50,7 +53,8 @@ async def submit(sid, data):
     print(f"[Socket.IO] {sid} finished checking their items.")
     oldShare = get_member_share(tab_id, member_id)
     print("old share: ", oldShare, "tip: ", tip, "new share: ", float(oldShare) + float(tip))
-    update_member_share(tab_id, member_id, float(oldShare) + float(tip))
+    update_member_share(tab_id, member_id, float(oldShare), -1)
+    update_member_tip(tab_id, member_id, tip)
     members = get_members_in_tab(tab_id)    
     allSubmitted = all(member.get("submitted") for member in members)
     if allSubmitted: 
@@ -73,6 +77,8 @@ async def update_checkbox(sid, data):
     members_to_update = [m.get("id") for m in get_members_in_item(tab_id, item_id)]
     num_members = len(members_to_update)
     item_cost = get_item_cost(tab_id, item_id)
+    total_tax = get_total_tax(tab_id)
+    subtotal = get_subtotal(tab_id)
     if checked:
         for member in members_to_update:
             share = get_member_share(tab_id, member)
@@ -81,16 +87,19 @@ async def update_checkbox(sid, data):
             else: # decrease share
                 share -= item_cost / (num_members - 1)
                 share += item_cost / num_members
-            update_member_share(tab_id, member, share)
+            tax = share / subtotal * total_tax
+            update_member_share(tab_id, member, share, tax)
     else: # checkbox was unchecked
         for member in members_to_update:
             share = get_member_share(tab_id, member)
             share -= item_cost / (num_members + 1)
             share += item_cost / num_members
-            update_member_share(tab_id, member, share)
+            tax = share / subtotal * total_tax
+            update_member_share(tab_id, member, share, tax)
         share = get_member_share(tab_id, member_id)
         share -= item_cost / (num_members + 1)
-        update_member_share(tab_id, member_id, share)
+        tax = share / subtotal * total_tax
+        update_member_share(tab_id, member_id, share, tax)
 
 # ASGI app to mount into FastAPI
 socket_app = socketio.ASGIApp(sio)
