@@ -9,7 +9,7 @@ function SummaryList({
 }) {
   if (total && summary[summary.length - 1].name !== "Total") {
     let sum = 0;
-    summary.forEach(item => sum += item.amount)
+    summary.forEach(item => sum += parseFloat(item.amount))
     summary.push({ name: "Total", amount: sum })
   }
   return (
