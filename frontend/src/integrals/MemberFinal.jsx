@@ -60,7 +60,7 @@ const MemberFinal = () => {
         {subtotal ? (
           <div className="w-full">
             <p className="text-lg mb-2">Please transfer your share to</p>
-            <div className="my-4 bg-gray-100 shadow-inner p-2 rounded-2xl text-gray-800 text-md w-full max-w-xs">
+            <div className="my-4 mx-auto bg-gray-100 shadow-inner p-2 rounded-2xl text-gray-800 text-md w-full max-w-xs">
               {paymentInfo}
             </div>
             <SummaryList borderTop borderBottom summary={[
