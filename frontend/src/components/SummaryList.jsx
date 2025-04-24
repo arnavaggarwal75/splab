@@ -1,7 +1,9 @@
+import { roundMoney } from "../utils/formatMoney.js";
+
 function SummaryList({
   summary,
-  total = false, 
-  borderTop = false, 
+  total = false,
+  borderTop = false,
   borderBottom = false,
   fullWidth = false
 }) {
@@ -15,7 +17,7 @@ function SummaryList({
       {summary.map((object, index) =>
         <div key={index} className={`flex flex-row justify-between ${fullWidth ? "w-full" : "w-[80%]"}`}>
           <p>{object.name}:</p>
-          <p className="font-bold">${(Math.round(parseFloat(object.amount) * 100) / 100).toFixed(2)}</p>
+          <p className="font-bold">${roundMoney(object.amount)}</p>
         </div>
       )}
     </div>
