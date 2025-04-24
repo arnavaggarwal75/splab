@@ -55,7 +55,7 @@ function TabList() {
     currentSocketRef.current.emit("submit", {
       tab_id: searchParams.get("code"),
       member_id: user.memberId,
-      tip: tip,
+      tip: parseFloat(tip),
     });
   };
 
@@ -286,16 +286,10 @@ function TabList() {
       </div>
 
       <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md shadow-xl">
-        <SummaryList summary={[
+        <SummaryList total borderTop summary={[
           { name: "Subtotal", amount: share },
           { name: "Tax", amount: tax },
           ...(tip ? [{ name: "Tip", amount: tip }] : []),
-          { 
-            name: "Total", 
-            amount: parseFloat(share) 
-                    + (tip ? parseFloat(tip) : 0)
-                    + (tax ? parseFloat(tax) : 0)
-          },
         ]} />
         <div className="flex items-center justify-evenly px-6 py-4 border-t border-gray-300">
           <input

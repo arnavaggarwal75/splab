@@ -4,6 +4,7 @@ import logo from "../assets/logo.png";
 import { RotatingLines } from "react-loader-spinner";
 import { useUser } from "../contexts/UserContext";
 import axiosClient from "../api/axiosClient";
+import { sumMoney, roundMoney } from "../utils/formatMoney.js";
 import SummaryList from "../components/SummaryList";
 
 const MemberFinal = () => {
@@ -68,7 +69,7 @@ const MemberFinal = () => {
               { name: "Tip", amount: tip },
             ]}/>
             <p className="text-lg mt-4">You owe:</p>
-            <p className="text-4xl font-bold mt-2">${parseFloat(subtotal) + parseFloat(tax) + parseFloat(tip)}</p>
+            <p className="text-4xl font-bold mt-2">${sumMoney([subtotal, tax, tip])}</p>
           </div>
         ) : (
           <RotatingLines

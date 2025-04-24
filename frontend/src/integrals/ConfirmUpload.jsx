@@ -65,8 +65,8 @@ function ConfirmUpload() {
         owner_name: user.name,
         owner_payment_id: user.paymentInfo,
         items,
-        tax,
-        subtotal,
+        tax: parseFloat(tax),
+        subtotal: parseFloat(subtotal),
       })
       .then((response) => {
         navigate(`/get-link?code=${response.data.tab_id}`);
@@ -148,10 +148,10 @@ function ConfirmUpload() {
         +
       </button>
       <div className="flex flex-col justify-evenly shadow-xl items-center bg-white/70 backdrop-blur-md w-full">
-        <SummaryList summary={[
+        <SummaryList borderTop summary={[
           { name: "Subtotal", amount: subtotal },
           { name: "Tax", amount: tax },
-          { name: "Total", amount: parseFloat(subtotal) + parseFloat(tax)},
+          { name: "Total", amount: parseFloat(subtotal) + parseFloat(tax) },
         ]} />
         <div className="px-6 py-4 flex justify-evenly items-center w-full">
           <button
