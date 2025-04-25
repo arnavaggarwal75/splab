@@ -15,7 +15,7 @@ function TabList() {
   let navigate = useNavigate();
 
   const { currentSocketRef, connectToSocket } = useSocket();
-  const { user, setUser } = useUser();
+  const { user, setUser, saveUser, getUser } = useUser();
   const joinedTab = useRef(false);
 
   const [items, setItems] = useState([]);
@@ -63,29 +63,38 @@ function TabList() {
       navigate("/");
       return;
     }
+    if (!user && !getUser()) {
+      navigate(`/member-home?code=${code}`)
+      return;
+    }
+    if (!user) {
+      return;
+    }
 
     const getMemberId = async () => {
-      const tabId = localStorage.getItem("tabId");
+      const { code: tabId, memberId } = getUser();
+      console.log("memberId", memberId);
       if (tabId == code) {
-        const memberId = localStorage.getItem("memberId");
+        if(!memberId) {
+          navigate(`/member-home?code=${code}`)
+        }
         const response = await axiosClient.get(
           `/tabs/${code}/members/${memberId}`
         );
         const member = response.data.member;
-        if (user.joined && member.name !== user.name) {
+        console.log("Member here", member);
+        saveUser({
+          ...user,
+          paymentInfo: member.payment_info,
+          isOwner: member.is_owner,
+          name: user.name || member.name,
+        })
+        if (user.name && member.name !== user.name) {
           console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
           axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
             name: user.name,
           });
         }
-        setUser((prev) => ({
-          ...prev,
-          name: user.joined ? user.name : member.name,
-          paymentInfo: member.payment_info,
-          isOwner: member.is_owner,
-          memberId,
-        }));
-        console.log(member.name, memberId);
         return false;
       }
       return true;
@@ -100,12 +109,16 @@ function TabList() {
         payment_info: user.paymentInfo,
       });
       const memberId = response.data.member_id;
-      localStorage.setItem("memberId", memberId);
-      localStorage.setItem("tabId", code);
-      setUser((prev) => ({ ...prev, memberId }));
+      saveUser({
+        ...user,
+        memberId,
+        code,
+      })
     };
+
     (async () => {
       const needToJoin = await getMemberId();
+      console.log(needToJoin);
       if (!joinedTab.current && needToJoin) {
         joinedTab.current = true;
         await joinTab();
@@ -115,7 +128,7 @@ function TabList() {
 
   // useEffect after getting user.memberId
   useEffect(() => {
-    if(!user.memberId) return;
+    if(!user?.memberId) return;
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -207,7 +220,7 @@ function TabList() {
     })();
 
     return unsubscribe;
-  }, [user.memberId]);
+  }, [user?.memberId]);
 
   // useEffect for all submitted socket handler
   useEffect(() => {
@@ -222,7 +235,7 @@ function TabList() {
         navigate(`/member-final?code=${code}`);
       }
     });
-  }, [currentSocketRef.current, user.memberId, user.isOwner]);
+  }, [currentSocketRef.current]);
 
   if (isLoading) {
     return (

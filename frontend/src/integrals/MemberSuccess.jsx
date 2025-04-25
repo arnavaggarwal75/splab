@@ -1,11 +1,14 @@
 import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import axiosClient from "../api/axiosClient";
 import confetti from "canvas-confetti";
 import logo from "../assets/logo.png";
 
+import axiosClient from "../api/axiosClient";
+import { useUser } from "../contexts/UserContext";
+
 const MemberSuccess = () => {
   const [searchParams] = useSearchParams();
+  const { removeUser } = useUser();
   const tabId = searchParams.get("code");
   const memberId = searchParams.get("memberId");
 
@@ -16,21 +19,13 @@ const MemberSuccess = () => {
       origin: { y: 0.6 }
     });
     if (tabId && memberId) {
-      axiosClient
-        .post(`/tabs/mark_paid/${tabId}/${memberId}`)
-        .then(() => console.log("✅ Marked paid"))
-        .catch((err) => console.error("❌ Error marking paid", err));
+      axiosClient.post(`/tabs/mark_paid/${tabId}/${memberId}`).then(() =>
+        console.log("✅ Marked paid")
+      ).catch((err) =>
+        console.error("❌ Error marking paid", err)
+      );
     }
-
-    //cleanup
-    localStorage.removeItem("tabId");
-    localStorage.removeItem("memberId");
-    localStorage.removeItem("splab_user_name");
-    localStorage.removeItem("splab_payment_info");
-    localStorage.removeItem("splab_is_owner");
-
-
-
+    removeUser();
   }, [tabId, memberId]);
 
   return (

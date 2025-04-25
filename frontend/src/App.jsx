@@ -13,19 +13,16 @@ import MemberSuccess from "./integrals/MemberSuccess";
 import { useUser } from "./contexts/UserContext";
 
 function App() {
-  const { setUser } = useUser();
+  const { user, restoreUser } = useUser();
   useEffect(() => {
-    const name = localStorage.getItem("splab_user_name");
-    const paymentInfo = localStorage.getItem("splab_payment_info");
-    const isOwner     = localStorage.getItem("splab_is_owner") === "true";
+    restoreUser();
+  }, []);
 
-    setUser(prev => ({
-      ...prev,
-      name:  name ?? prev.name,
-      paymentInfo: paymentInfo ?? prev.paymentInfo,
-      isOwner,
-    }));
-  }, [setUser]);
+  useEffect(() => {
+    if(!user) return;
+    console.log("User restored", user);
+  }, [user])
+
   return (
     <div className="h-full">
       <BrowserRouter>

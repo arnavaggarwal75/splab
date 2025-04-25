@@ -14,14 +14,13 @@ function OwnerFinal() {
   const [searchParams] = useSearchParams();
   const tabId = searchParams.get("code");
 
-  const { user, setUser } = useUser();
+  const { user, removeUser } = useUser();
   const navigate = useNavigate();
 
 
   useEffect(() => {
+    if(!user) return;
     // 2) Call your FastAPI endpoint once on mount to load initial data
-    const memberId = localStorage.getItem('memberId');
-    setUser(prev => ({...prev, memberId}))
     axiosClient
       .get(`/tabs/${tabId}/members`)
       .then((response) => {
@@ -47,21 +46,14 @@ function OwnerFinal() {
 
     // Cleanup the listener on unmount
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
 
   const handleSettleTab = () => {
     axiosClient
       .delete(`/tabs/${tabId}`)
       .then(() => {
-
-        //cleanup
-        localStorage.removeItem("tabId");
-        localStorage.removeItem("memberId");
-        localStorage.removeItem("splab_user_name");
-        localStorage.removeItem("splab_payment_info");
-        localStorage.removeItem("splab_is_owner");
-        
+        removeUser();        
         navigate("/");
       })
       .catch((err) => {

@@ -9,10 +9,11 @@ import { RotatingLines } from "react-loader-spinner";
 const MemberHome = () => {
   const [tabOwner, setTabOwner] = useState("");
   const navigate = useNavigate();
-  const { setUser } = useUser();
-  const [name, setName] = useState("");
+  const { user, saveUser, removeUser } = useUser();
   const [searchParams] = useSearchParams();
   const code = searchParams.get("code");
+
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   const handleSubmit = (e) => {
@@ -21,13 +22,12 @@ const MemberHome = () => {
       alert("Please enter your name");
       return;
     }
-    setUser(prev => ({...prev, name: name, isOwner: false, joined: true}));
-
-    //cleanup
-    localStorage.setItem("splab_user_name", name);
-    localStorage.removeItem("splab_payment_info");
-    localStorage.setItem("splab_is_owner", "false");
-
+    removeUser();
+    saveUser({
+      ...user,
+      name,
+      isOwner: false,
+    });
     navigate("/tab-list?code=" + code);
   };
 
