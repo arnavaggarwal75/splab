@@ -4,6 +4,7 @@ import { useSocket } from "../contexts/SocketContext";
 import axiosClient from "../api/axiosClient";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
+import SummaryList from "../components/SummaryList";
 import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
 import { RotatingLines } from "react-loader-spinner";
@@ -20,8 +21,11 @@ function TabList() {
 
   const [items, setItems] = useState([]);
   const [checkedItems, setCheckedItems] = useState({});
+
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
+  const [tax, setTax] = useState(0);
+
   const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +37,6 @@ function TabList() {
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
-    console.log(checkedItems);
     setCheckedItems((prev) => ({
       ...prev,
       [index]: !prev[index],
@@ -52,7 +55,7 @@ function TabList() {
     currentSocketRef.current.emit("submit", {
       tab_id: searchParams.get("code"),
       member_id: user.memberId,
-      tip: tip,
+      tip: parseFloat(tip),
     });
   };
 
@@ -145,7 +148,7 @@ function TabList() {
 
         setMembers([]);
         response.data.members.forEach((member) => {
-          if(member.online || member.name == user.name) {
+          if (member.online || member.name == user.name) {
             setMembers(prev => [...prev, member.name]);
           }
         })
@@ -193,6 +196,9 @@ function TabList() {
           if (data.share !== undefined) {
             setShare(data.share);
           }
+          if (data.tax !== undefined) {
+            setTax(data.tax);
+          }
         } else {
           console.warn("Member document not found");
         }
@@ -214,7 +220,7 @@ function TabList() {
       };
     }
     getTabInfo();
-    let unsubscribe = () => {};
+    let unsubscribe = () => { };
     (async () => {
       unsubscribe = await connect();
     })();
@@ -292,13 +298,13 @@ function TabList() {
         )}
       </div>
 
-      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 shadow-xl">
-        <div className="flex justify-center py-2">
-          <span className="text-black text-lg font-semibold">
-            You owe: ${(Math.round(share * 100) / 100).toFixed(2)}
-          </span>
-        </div>
-        <div className="flex items-center justify-evenly px-6 py-4">
+      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md shadow-xl">
+        <SummaryList total borderTop summary={[
+          { name: "Subtotal", amount: share },
+          { name: "Tax", amount: tax },
+          ...(tip ? [{ name: "Tip", amount: tip }] : []),
+        ]} />
+        <div className="flex items-center justify-evenly px-6 py-4 border-t border-gray-300">
           <input
             type="text"
             inputMode="decimal"
