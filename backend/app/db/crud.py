@@ -4,10 +4,17 @@ from google.cloud import firestore
 
 tabs_collection = db.collection("Tabs")
 
-def create_tab(items: list[dict], owner_name: str, owner_payment_id: str):
+def create_tab(items: list[dict], owner_name: str, owner_payment_id: str, tax: float, subtotal: float):
     tab_id = generate_unique_tab_id()
     print(f"Creating tab {tab_id}")
-    tabs_collection.document(tab_id).set({"tab_id": tab_id, "owner_name": owner_name, "payment_info": owner_payment_id})
+    tabs_collection.document(tab_id).set({
+        "tab_id": tab_id,
+        "owner_name": owner_name,
+        "payment_info": owner_payment_id,
+        "tax": tax,
+        "subtotal": subtotal,
+        "total_tip": 0.0,
+    })
     for item in items:
         tabs_collection.document(tab_id).collection("items").add(item)
     return (tab_id)
@@ -40,6 +47,29 @@ def get_items_in_tab(tab_id: str):
     if invalid_tab_id(tab_id): return None
     items = tabs_collection.document(tab_id).collection("items").get()
     return [{"id": item.id, **item.to_dict()} for item in items] if items else None
+
+def get_bill_summary(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id).get().to_dict()
+    needed_keys = ["subtotal", "total_tip", "tax"]
+    return {k: v for k, v in tab.items() if k in needed_keys}
+
+def get_subtotal(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id).get()
+    tab_data = tab.to_dict() or {}
+    return float(tab_data["subtotal"])
+
+def get_total_tax(tab_id: str):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id).get()
+    tab_data = tab.to_dict() or {}
+    return float(tab_data["tax"])
+
+def increase_total_tip(tab_id: str, tip: float):
+    if invalid_tab_id(tab_id): return None
+    tab = tabs_collection.document(tab_id)
+    tab.update({"total_tip": firestore.Increment(tip)})
 
 def update_item_members(tab_id: str, item_id: str, members: list[dict]):
     if invalid_tab_id(tab_id): return None
@@ -121,10 +151,19 @@ def get_member_share(tab_id: str, member_id: str):
         return member.to_dict().get("share", 0)
     return 0
 
-def update_member_share(tab_id: str, member_id: str, share: float):
+def update_member_share(tab_id: str, member_id: str, share: float, tax: float):
     if invalid_tab_id(tab_id): return None
     member = tabs_collection.document(tab_id).collection("members").document(member_id)
-    member.update({"share": share})
+    if tax != -1:
+        member.update({"share": share, "tax": tax})
+    else:
+        member.update({"share": share})
+    return tab_id
+
+def update_member_tip(tab_id: str, member_id: str, tip: float):
+    if invalid_tab_id(tab_id): return None
+    member = tabs_collection.document(tab_id).collection("members").document(member_id)
+    member.update({"tip": tip})
     return tab_id
 
 def get_item_cost(tab_id: str, item_id: str):

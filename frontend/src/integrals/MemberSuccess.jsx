@@ -1,19 +1,20 @@
 import React, { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import confetti from "canvas-confetti";
 import logo from "../assets/logo.png";
 
 const MemberSuccess = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const tabId = searchParams.get("code");
   const memberId = searchParams.get("memberId");
 
   useEffect(() => {
     confetti({
       particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 }
+      spread: 90,
+      origin: { y: 0.7 },
     });
     if (tabId && memberId) {
       axiosClient
@@ -30,6 +31,7 @@ const MemberSuccess = () => {
 
         <h2 className="text-2xl font-bold mb-2 text-[var(--primary)]">You’re all paid up!</h2>
         <p className="text-gray-500 text-sm mb-6">Thanks for settling your share.</p>
+        <button onClick={() => navigate("/")} className="bg-[var(--primary)] text-white font-semibold btn-pressable rounded-full px-6 py-2">Go to Home</button>
       </div>
     </div>
   );
