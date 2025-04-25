@@ -46,7 +46,7 @@ const MemberFinal = () => {
           src={logo}
           className="w-24 h-24 mb-4 flex items-center justify-center"
         />
-        {amount ? (
+        {amount !== null ? (
           <div>
             <p className="text-lg mb-2">Please transfer your share to</p>
             <div className="mt-2 bg-gray-100 shadow-inner p-2 rounded-2xl text-gray-800 text-md w-full max-w-xs">
