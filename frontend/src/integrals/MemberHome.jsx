@@ -22,6 +22,12 @@ const MemberHome = () => {
       return;
     }
     setUser(prev => ({...prev, name: name, isOwner: false, joined: true}));
+
+    //cleanup
+    localStorage.setItem("splab_user_name", name);
+    localStorage.removeItem("splab_payment_info");
+    localStorage.setItem("splab_is_owner", "false");
+
     navigate("/tab-list?code=" + code);
   };
 

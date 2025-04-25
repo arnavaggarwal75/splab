@@ -21,6 +21,16 @@ const MemberSuccess = () => {
         .then(() => console.log("✅ Marked paid"))
         .catch((err) => console.error("❌ Error marking paid", err));
     }
+
+    //cleanup
+    localStorage.removeItem("tabId");
+    localStorage.removeItem("memberId");
+    localStorage.removeItem("splab_user_name");
+    localStorage.removeItem("splab_payment_info");
+    localStorage.removeItem("splab_is_owner");
+
+
+
   }, [tabId, memberId]);
 
   return (

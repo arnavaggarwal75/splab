@@ -54,6 +54,14 @@ function OwnerFinal() {
     axiosClient
       .delete(`/tabs/${tabId}`)
       .then(() => {
+
+        //cleanup
+        localStorage.removeItem("tabId");
+        localStorage.removeItem("memberId");
+        localStorage.removeItem("splab_user_name");
+        localStorage.removeItem("splab_payment_info");
+        localStorage.removeItem("splab_is_owner");
+        
         navigate("/");
       })
       .catch((err) => {

@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import logo from "../assets/logo.png";
 
 function Home() {
+  useEffect(() => {
+    localStorage.removeItem("tabId");
+    localStorage.removeItem("memberId");
+  }, []);
+
   const [isOwner, setIsOwner] = useState(true);
   const [name, setName] = useState("");
   const [paymentInfo, setPaymentInfo] = useState("");
   const [code, setCode] = useState("");
   const navigate = useNavigate();
   const { setUser } = useUser();
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,6 +30,9 @@ function Home() {
         paymentInfo,
         isOwner: true,
       }));
+      localStorage.setItem("splab_user_name", name);
+      localStorage.setItem("splab_payment_info", paymentInfo);
+      localStorage.setItem("splab_is_owner", "true");
       navigate("/upload");
     } else {
       if (!name || !code) {
@@ -36,6 +45,9 @@ function Home() {
         isOwner: false,
         joined: true,
       }));
+      localStorage.setItem("splab_user_name", name);
+      localStorage.removeItem("splab_payment_info");
+      localStorage.setItem("splab_is_owner", "false");
       navigate(`/tab-list?code=${code}`);
     }
   };
