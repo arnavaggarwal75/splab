@@ -10,7 +10,7 @@ import SummaryList from "../components/SummaryList";
 const MemberFinal = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
 
   const [tip, setTip] = useState(null);
   const [tax, setTax] = useState(null);
@@ -22,14 +22,11 @@ const MemberFinal = () => {
     if (!code) {
       navigate("/");
     }
-    axiosClient
-      .post(`/tabs/mark_paid/${code}/${user.memberId}`)
-      .then((response) => {
-        navigate("/member-success?code=" + code + "&member_id=" + user.memberId);
-      })
-      .catch((error) => {
-        alert("Something went wrong", error);
-      });
+    axiosClient.post(`/tabs/mark_paid/${code}/${user.memberId}`).then((response) => {
+      navigate("/member-success?code=" + code + "&member_id=" + user.memberId);
+    }).catch((error) => {
+      alert("Something went wrong", error);
+    });
   };
 
   useEffect(() => {
@@ -37,12 +34,12 @@ const MemberFinal = () => {
     let memberId = user.memberId;
     if (!memberId) {
       memberId = localStorage.getItem("memberId");
+      setUser(prev => ({ ...prev, memberId }));
     }
     if (!code) {
       navigate("/");
     }
     axiosClient.get(`/tabs/share/${code}/${memberId}`).then((response) => {
-      console.log(response);
       setTax(response.data.member.tax);
       setTip(response.data.member.tip);
       setSubtotal(response.data.member.share);
@@ -67,7 +64,7 @@ const MemberFinal = () => {
               { name: "Subtotal", amount: subtotal },
               { name: "Tax", amount: tax },
               { name: "Tip", amount: tip },
-            ]}/>
+            ]} />
             <p className="text-lg mt-4">You owe:</p>
             <p className="text-4xl font-bold mt-2">${sumMoney([subtotal, tax, tip])}</p>
           </div>

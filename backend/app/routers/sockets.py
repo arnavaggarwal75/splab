@@ -55,8 +55,8 @@ async def submit(sid, data):
 
     mark_member_submitted(tab_id, member_id)
     print(f"[Socket.IO] {sid} finished checking their items.")
-    update_member_tip(tab_id, member_id, tip)
-    increase_total_tip(tab_id, tip)
+    update_member_tip(tab_id, member_id, tip if tip != None else 0)
+    increase_total_tip(tab_id, tip if tip != None else 0)
 
     members = get_members_in_tab(tab_id)    
     allSubmitted = all(member.get("submitted") for member in members)
