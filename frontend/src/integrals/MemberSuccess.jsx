@@ -11,9 +11,9 @@ const MemberSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabId = searchParams.get("code");
+  const memberId = searchParams.get("memberId");
 
   const { removeUser } = useUser();
-  const memberId = searchParams.get("memberId");
 
   useEffect(() => {
     confetti({

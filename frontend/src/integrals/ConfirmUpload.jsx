@@ -13,7 +13,9 @@ import SummaryList from "../components/SummaryList";
 function ConfirmUpload() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const { user, setUser } = useUser();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [editItem, setEditItem] = useState(null);

@@ -8,12 +8,13 @@ import axiosClient from "../api/axiosClient";
 import { useUser } from "../contexts/UserContext";
 
 const MemberHome = () => {
-  const [tabOwner, setTabOwner] = useState("");
   const navigate = useNavigate();
-  const { user, saveUser, removeUser } = useUser();
   const [searchParams] = useSearchParams();
   const code = searchParams.get("code");
 
+  const { user, saveUser, removeUser } = useUser();
+
+  const [tabOwner, setTabOwner] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 

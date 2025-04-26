@@ -5,14 +5,14 @@ import { useUser } from "../contexts/UserContext";
 import logo from "../assets/logo.png";
 
 function Home() {
+  const navigate = useNavigate();
 
+  const { user, removeUser, saveUser } = useUser();
 
   const [isOwner, setIsOwner] = useState(true);
   const [name, setName] = useState("");
   const [paymentInfo, setPaymentInfo] = useState("");
   const [code, setCode] = useState("");
-  const navigate = useNavigate();
-  const { user, setUser, removeUser, saveUser } = useUser();
   
   useEffect(() => {
     removeUser();
