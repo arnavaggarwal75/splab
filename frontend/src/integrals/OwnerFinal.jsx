@@ -17,17 +17,18 @@ function OwnerFinal() {
   const [searchParams] = useSearchParams();
   const tabId = searchParams.get("code");
 
-  const { user, setUser } = useUser();
+  const { user, removeUser } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const memberId = localStorage.getItem('memberId');
-    setUser(prev => ({ ...prev, memberId }))
+    if(!user) return;
 
     axiosClient.get(`/tabs/${tabId}/owner_summary`).then((response) => {
       setBillSummary(response.data.bill_summary)
       setMembers(response.data.members)
-    })
+    }).catch((error) => {
+      console.error("Error fetching initial members:", error);
+    });
 
     const membersRef = collection(db, "Tabs", tabId, "members");
     const unsubscribe = onSnapshot(membersRef, (snapshot) => {
@@ -39,11 +40,12 @@ function OwnerFinal() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
 
   const handleSettleTab = () => {
     axiosClient.delete(`/tabs/${tabId}`).then(() => {
+      removeUser();
       navigate("/");
     }).catch((err) => {
       console.error("Error settling tab:", err);

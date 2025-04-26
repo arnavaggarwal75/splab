@@ -30,22 +30,21 @@ const MemberFinal = () => {
   };
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    let memberId = user.memberId;
-    if (!memberId) {
-      memberId = localStorage.getItem("memberId");
-      setUser(prev => ({ ...prev, memberId }));
+    if(!user) {
+      return;
     }
+    const code = searchParams.get("code");
     if (!code) {
       navigate("/");
+      return;
     }
-    axiosClient.get(`/tabs/share/${code}/${memberId}`).then((response) => {
+    axiosClient.get(`/tabs/share/${code}/${user.memberId}`).then((response) => {
       setTax(response.data.member.tax);
       setTip(response.data.member.tip);
       setSubtotal(response.data.member.share);
       setPaymentInfo(response.data.payment_info);
     });
-  }, []);
+  }, [user]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200 px-8 text-center font-mono">

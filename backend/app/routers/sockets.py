@@ -33,7 +33,7 @@ async def connect(sid, environ):
     member_id = params.get('member_id', [None])[0] 
     print(f"[Socket.IO] tab_id: {tab_id} member_id: {member_id}")
     if not member_exists(tab_id, member_id):
-        print(f"A socket connection was attempted with a nonexistant user")
+        print(f"A socket connection was attempted with a nonexistant user... not returning...")
         return
     print(f"Member id {member_id} connected to socket for tab {tab_id}")
     sid_associations[sid] = (tab_id, member_id)
@@ -42,6 +42,7 @@ async def connect(sid, environ):
 
 @sio.event
 async def disconnect(sid):
+    if sid not in sid_associations: return
     tab_id, member_id = sid_associations[sid]
     set_member_online_status(tab_id, member_id, False)
     del sid_associations[sid]

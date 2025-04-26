@@ -1,13 +1,17 @@
 import React, { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import axiosClient from "../api/axiosClient";
 import confetti from "canvas-confetti";
 import logo from "../assets/logo.png";
 
+import axiosClient from "../api/axiosClient";
+import { useUser } from "../contexts/UserContext";
+
 const MemberSuccess = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const tabId = searchParams.get("code");
+
+  const { removeUser } = useUser();
   const memberId = searchParams.get("memberId");
 
   useEffect(() => {
@@ -17,11 +21,13 @@ const MemberSuccess = () => {
       origin: { y: 0.7 },
     });
     if (tabId && memberId) {
-      axiosClient
-        .post(`/tabs/mark_paid/${tabId}/${memberId}`)
-        .then(() => console.log("✅ Marked paid"))
-        .catch((err) => console.error("❌ Error marking paid", err));
+      axiosClient.post(`/tabs/mark_paid/${tabId}/${memberId}`).then(() =>
+        console.log("✅ Marked paid")
+      ).catch((err) =>
+        console.error("❌ Error marking paid", err)
+      );
     }
+    removeUser();
   }, [tabId, memberId]);
 
   return (
