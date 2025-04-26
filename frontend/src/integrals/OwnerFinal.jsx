@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
-import axiosClient from "../api/axiosClient";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
+
+import axiosClient from "../api/axiosClient";
+import { useUser } from "../contexts/UserContext";
+import logo from "../assets/logo.png";
+import { sumMoney } from "../utils/formatMoney";
 import MemberSplit from "../components/MemberSplit";
 import SummaryList from "../components/SummaryList";
-import logo from "../assets/logo.png";
-import { useSearchParams } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom";
-import { sumMoney } from "../utils/formatMoney";
 
 function OwnerFinal() {
-  const [members, setMembers] = useState([]);
-  const [billSummary, setBillSummary] = useState({});
-
   const [searchParams] = useSearchParams();
   const tabId = searchParams.get("code");
+  const navigate = useNavigate();
 
   const { user, removeUser } = useUser();
-  const navigate = useNavigate();
+
+  const [members, setMembers] = useState([]);
+  const [billSummary, setBillSummary] = useState({});
 
   useEffect(() => {
     if(!user) return;

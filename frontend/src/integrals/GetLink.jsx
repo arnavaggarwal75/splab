@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+
 import logo from "../assets/logo.png";
 
 const GetLink = () => {

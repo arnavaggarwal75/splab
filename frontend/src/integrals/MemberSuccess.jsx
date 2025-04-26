@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+
 import confetti from "canvas-confetti";
-import logo from "../assets/logo.png";
 
 import axiosClient from "../api/axiosClient";
 import { useUser } from "../contexts/UserContext";
+import logo from "../assets/logo.png";
 
 const MemberSuccess = () => {
   const navigate = useNavigate();
