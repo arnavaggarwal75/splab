@@ -4,13 +4,13 @@ from app.db import (
     delete_tab,
     mark_member_paid,
     get_items_in_tab,
-    get_member_share,
     get_members_in_tab,
     get_payment_info,
     get_tab,
     add_member_to_tab,
     get_owner_name,
     get_one_member,
+    get_bill_summary,
     update_member_name,
     update_item_members,
 )
@@ -30,9 +30,11 @@ async def create_tab_api(request: Request):
     body: dict = await request.json()
     owner_name: str = body.get("owner_name")
     owner_payment_id: str = body.get("owner_payment_id")
+    tax: float = body.get("tax")
+    subtotal: float = body.get("subtotal")
     items: list[dict] = body.get("items")
 
-    tab_id = create_tab(items, owner_name, owner_payment_id)
+    tab_id = create_tab(items, owner_name, owner_payment_id, tax, subtotal)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"tab_id": tab_id}
@@ -51,8 +53,9 @@ async def add_member_to_tab_api(request: Request):
             "payment_info": payment_info,
             "is_owner": is_owner,
             "submitted": False,
-            "share": 0.0,
             "online": False,
+            "share": 0.0,
+            "tax": 0.0,
         }
         member_id = add_member_to_tab(tab_id, member)
     else:
@@ -61,8 +64,9 @@ async def add_member_to_tab_api(request: Request):
             "is_owner": is_owner,
             "paid": False,
             "submitted": False,
-            "share": 0.0,
             "online": False,
+            "share": 0.0,
+            "tax": 0.0,
         }
         member_id = add_member_to_tab(tab_id, member)
         print("Member_id", member_id)
@@ -141,11 +145,25 @@ async def get_single_member(tab_id: str, member_id: str):
 
 @router.get("/share/{tab_id}/{member_id}")
 async def get_member_share_api(tab_id: str, member_id: str):
-    share = get_member_share(tab_id, member_id)
+    member = get_one_member(tab_id, member_id)
     payment_info = get_payment_info(tab_id)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"share": share, "payment_info": payment_info},
+        content={"member": member, "payment_info": payment_info},
+    )
+
+@router.get("/{tab_id}/owner_summary")
+async def get_owner_summary_api(tab_id: str):
+    members: list = get_members_in_tab(tab_id)
+    bill_summary: dict = get_bill_summary(tab_id)
+    if members is None or bill_summary is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Tab with ID '{tab_id}' not found or invalid."}
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"members": members, "bill_summary": bill_summary}
     )
 
 @router.post("/mark_paid/{tab_id}/{member_id}")

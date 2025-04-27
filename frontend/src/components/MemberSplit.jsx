@@ -1,6 +1,6 @@
 function MemberSplit({ name, share, submitted }) {
   return (
-    <div className="my-2 ml-2 relative flex flex-row items-center justify-between overflow-scroll">
+    <div className="my-2 ml-2 relative flex flex-row items-center justify-between">
       {/* Disabled checkbox on the left */}
       <div className="flex items-center">
         <input

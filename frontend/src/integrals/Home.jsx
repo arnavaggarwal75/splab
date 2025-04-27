@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useUser } from "../contexts/UserContext";
 import logo from "../assets/logo.png";
 
 function Home() {
+  const navigate = useNavigate();
+
+  const { user, removeUser, saveUser } = useUser();
+
   const [isOwner, setIsOwner] = useState(true);
   const [name, setName] = useState("");
   const [paymentInfo, setPaymentInfo] = useState("");
   const [code, setCode] = useState("");
-  const navigate = useNavigate();
-  const { setUser } = useUser();
+  
+  useEffect(() => {
+    removeUser();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,24 +25,25 @@ function Home() {
         alert("Please fill all fields");
         return;
       }
-      setUser(prev => ({
-        ...prev,
+      const newUser = {
+        ...user,
         name,
         paymentInfo,
-        isOwner: true,
-      }));
+        isOwner: true
+      }
+      saveUser(newUser);
       navigate("/upload");
     } else {
       if (!name || !code) {
         alert("Please fill all fields");
         return;
       }
-      setUser(prev => ({
-        ...prev,
+      const newUser = {
+        ...user,
         name,
         isOwner: false,
-        joined: true,
-      }));
+      }
+      saveUser(newUser);
       navigate(`/tab-list?code=${code}`);
     }
   };

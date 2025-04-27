@@ -1,27 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSocket } from "../contexts/SocketContext";
-import axiosClient from "../api/axiosClient";
-import BillItem from "../components/BillItem";
-import AvatarCircles from "../components/AvatarCircles";
 import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
+
 import { RotatingLines } from "react-loader-spinner";
+
+import axiosClient from "../api/axiosClient";
+import { useSocket } from "../contexts/SocketContext";
 import { useUser } from "../contexts/UserContext";
 import logo from "../assets/logo.png";
+import BillItem from "../components/BillItem";
+import AvatarCircles from "../components/AvatarCircles";
+import SummaryList from "../components/SummaryList";
 
 function TabList() {
   let [searchParams] = useSearchParams();
   let navigate = useNavigate();
 
   const { currentSocketRef, connectToSocket } = useSocket();
-  const { user, setUser } = useUser();
+  const { user, setUser, saveUser, getUser } = useUser();
   const joinedTab = useRef(false);
 
   const [items, setItems] = useState([]);
   const [checkedItems, setCheckedItems] = useState({});
+
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
+  const [tax, setTax] = useState(0);
+
   const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +39,6 @@ function TabList() {
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
-    console.log(checkedItems);
     setCheckedItems((prev) => ({
       ...prev,
       [index]: !prev[index],
@@ -52,7 +57,7 @@ function TabList() {
     currentSocketRef.current.emit("submit", {
       tab_id: searchParams.get("code"),
       member_id: user.memberId,
-      tip: tip,
+      tip: parseFloat(tip),
     });
   };
 
@@ -63,29 +68,38 @@ function TabList() {
       navigate("/");
       return;
     }
+    if (!user && !getUser()) {
+      navigate(`/member-home?code=${code}`)
+      return;
+    }
+    if (!user) {
+      return;
+    }
 
     const getMemberId = async () => {
-      const tabId = localStorage.getItem("tabId");
+      const { code: tabId, memberId } = getUser();
+      console.log("memberId", memberId);
       if (tabId == code) {
-        const memberId = localStorage.getItem("memberId");
+        if(!memberId) {
+          navigate(`/member-home?code=${code}`)
+        }
         const response = await axiosClient.get(
           `/tabs/${code}/members/${memberId}`
         );
         const member = response.data.member;
-        if (user.joined && member.name !== user.name) {
+        console.log("Member here", member);
+        saveUser({
+          ...user,
+          paymentInfo: member.payment_info,
+          isOwner: member.is_owner,
+          name: user.name || member.name,
+        })
+        if (user.name && member.name !== user.name) {
           console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
           axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
             name: user.name,
           });
         }
-        setUser((prev) => ({
-          ...prev,
-          name: user.joined ? user.name : member.name,
-          paymentInfo: member.payment_info,
-          isOwner: member.is_owner,
-          memberId,
-        }));
-        console.log(member.name, memberId);
         return false;
       }
       return true;
@@ -100,12 +114,16 @@ function TabList() {
         payment_info: user.paymentInfo,
       });
       const memberId = response.data.member_id;
-      localStorage.setItem("memberId", memberId);
-      localStorage.setItem("tabId", code);
-      setUser((prev) => ({ ...prev, memberId }));
+      saveUser({
+        ...user,
+        memberId,
+        code,
+      })
     };
+
     (async () => {
       const needToJoin = await getMemberId();
+      console.log(needToJoin);
       if (!joinedTab.current && needToJoin) {
         joinedTab.current = true;
         await joinTab();
@@ -115,7 +133,7 @@ function TabList() {
 
   // useEffect after getting user.memberId
   useEffect(() => {
-    if(!user.memberId) return;
+    if(!user?.memberId) return;
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -132,7 +150,7 @@ function TabList() {
 
         setMembers([]);
         response.data.members.forEach((member) => {
-          if(member.online || member.name == user.name) {
+          if (member.online || member.name == user.name) {
             setMembers(prev => [...prev, member.name]);
           }
         })
@@ -180,6 +198,9 @@ function TabList() {
           if (data.share !== undefined) {
             setShare(data.share);
           }
+          if (data.tax !== undefined) {
+            setTax(data.tax);
+          }
         } else {
           console.warn("Member document not found");
         }
@@ -201,13 +222,13 @@ function TabList() {
       };
     }
     getTabInfo();
-    let unsubscribe = () => {};
+    let unsubscribe = () => { };
     (async () => {
       unsubscribe = await connect();
     })();
 
     return unsubscribe;
-  }, [user.memberId]);
+  }, [user?.memberId]);
 
   // useEffect for all submitted socket handler
   useEffect(() => {
@@ -222,7 +243,7 @@ function TabList() {
         navigate(`/member-final?code=${code}`);
       }
     });
-  }, [currentSocketRef.current, user.memberId, user.isOwner]);
+  }, [currentSocketRef.current]);
 
   if (isLoading) {
     return (
@@ -279,13 +300,13 @@ function TabList() {
         )}
       </div>
 
-      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md border-t border-gray-300 shadow-xl">
-        <div className="flex justify-center py-2">
-          <span className="text-black text-lg font-semibold">
-            You owe: ${(Math.round(share * 100) / 100).toFixed(2)}
-          </span>
-        </div>
-        <div className="flex items-center justify-evenly px-6 py-4">
+      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md shadow-xl">
+        <SummaryList total borderTop summary={[
+          { name: "Subtotal", amount: share },
+          { name: "Tax", amount: tax },
+          ...(tip ? [{ name: "Tip", amount: tip }] : []),
+        ]} />
+        <div className="flex items-center justify-evenly px-6 py-4 border-t border-gray-300">
           <input
             type="text"
             inputMode="decimal"

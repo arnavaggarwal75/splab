@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useUser } from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.png";
-import { useSearchParams } from "react-router-dom";
-import axiosClient from "../api/axiosClient";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import { RotatingLines } from "react-loader-spinner";
 
+import logo from "../assets/logo.png";
+import axiosClient from "../api/axiosClient";
+import { useUser } from "../contexts/UserContext";
+
 const MemberHome = () => {
-  const [tabOwner, setTabOwner] = useState("");
   const navigate = useNavigate();
-  const { setUser } = useUser();
-  const [name, setName] = useState("");
   const [searchParams] = useSearchParams();
   const code = searchParams.get("code");
+
+  const { user, saveUser, removeUser } = useUser();
+
+  const [tabOwner, setTabOwner] = useState("");
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   const handleSubmit = (e) => {
@@ -21,7 +24,12 @@ const MemberHome = () => {
       alert("Please enter your name");
       return;
     }
-    setUser(prev => ({...prev, name: name, isOwner: false, joined: true}));
+    removeUser();
+    saveUser({
+      ...user,
+      name,
+      isOwner: false,
+    });
     navigate("/tab-list?code=" + code);
   };
 

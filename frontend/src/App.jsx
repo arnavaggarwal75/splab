@@ -1,5 +1,9 @@
 import "./style.css";
+
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import { useUser } from "./contexts/UserContext";
 import Home from "./integrals/Home";
 import TabList from "./integrals/TabList";
 import MemberFinal from "./integrals/MemberFinal";
@@ -11,6 +15,16 @@ import OwnerFinal from "./integrals/OwnerFinal";
 import MemberSuccess from "./integrals/MemberSuccess";
 
 function App() {
+  const { user, restoreUser } = useUser();
+  useEffect(() => {
+    restoreUser();
+  }, []);
+
+  useEffect(() => {
+    if(!user) return;
+    console.log("User restored", user);
+  }, [user])
+
   return (
     <div className="h-full">
       <BrowserRouter>
