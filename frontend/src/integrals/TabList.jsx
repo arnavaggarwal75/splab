@@ -18,7 +18,7 @@ function TabList() {
   let navigate = useNavigate();
 
   const { currentSocketRef, connectToSocket } = useSocket();
-  const { user, setUser, saveUser, getUser } = useUser();
+  const { user, saveUser, getUser } = useUser();
   const joinedTab = useRef(false);
 
   const [items, setItems] = useState([]);
@@ -32,10 +32,23 @@ function TabList() {
   const [ownerName, setOwnerName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isWaiting, setIsWaiting] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const getFirstName = (name) => {
     return name.split(" ")[0];
   };
+
+  const handleRemoveMember = async (memberId) => {
+    if (!user.isOwner || !window.confirm("Are you sure you want to remove this member?")) return;
+    try {
+      const code = searchParams.get("code");
+      await axiosClient.delete(`/tabs/member/${code}/${memberId}`);
+      console.log(`Removed member ${memberId}`);
+      setIsExpanded(false);
+    } catch (error) {
+      console.error("Error removing member:", error);
+    }
+  };  
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
@@ -69,7 +82,7 @@ function TabList() {
       return;
     }
     if (!user && !getUser()) {
-      navigate(`/member-home?code=${code}`)
+      navigate(`/member-home?code=${code}`);
       return;
     }
     if (!user) {
@@ -80,8 +93,8 @@ function TabList() {
       const { code: tabId, memberId } = getUser();
       console.log("memberId", memberId);
       if (tabId == code) {
-        if(!memberId) {
-          navigate(`/member-home?code=${code}`)
+        if (!memberId) {
+          navigate(`/member-home?code=${code}`);
         }
         const response = await axiosClient.get(
           `/tabs/${code}/members/${memberId}`
@@ -93,9 +106,14 @@ function TabList() {
           paymentInfo: member.payment_info,
           isOwner: member.is_owner,
           name: user.name || member.name,
-        })
+        });
         if (user.name && member.name !== user.name) {
-          console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
+          console.log(
+            "Updating name since member name was " +
+              member.name +
+              " and user name is " +
+              user.name
+          );
           axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
             name: user.name,
           });
@@ -118,7 +136,7 @@ function TabList() {
         ...user,
         memberId,
         code,
-      })
+      });
     };
 
     (async () => {
@@ -133,7 +151,7 @@ function TabList() {
 
   // useEffect after getting user.memberId
   useEffect(() => {
-    if(!user?.memberId) return;
+    if (!user?.memberId) return;
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -146,14 +164,17 @@ function TabList() {
               [item.id]: true,
             }));
           }
-        })
+        });
 
         setMembers([]);
         response.data.members.forEach((member) => {
           if (member.online || member.name == user.name) {
-            setMembers(prev => [...prev, member.name]);
+            setMembers((prev) => [
+              ...prev,
+              { name: member.name, id: member.id },
+            ]);
           }
-        })
+        });
 
         setItems(response.data.items);
         setOwnerName(response.data.owner_name);
@@ -163,7 +184,6 @@ function TabList() {
 
     const connect = async () => {
       console.log("Starting connect", user.memberId);
-      // connect to socket
       connectToSocket(user.memberId, code);
 
       // setup snapshots
@@ -179,7 +199,10 @@ function TabList() {
           setMembers([]);
           collectionSnap.forEach((member) => {
             if (member.data().online || member.data().name == user.name) {
-              setMembers(prev => [...prev, member.data().name]);
+              setMembers((prev) => [
+                ...prev,
+                { name: member.data().name, id: member.id },
+              ]);
             }
           });
         }
@@ -220,9 +243,9 @@ function TabList() {
         unsubscribeShare();
         unsubscribeItems();
       };
-    }
+    };
     getTabInfo();
-    let unsubscribe = () => { };
+    let unsubscribe = () => {};
     (async () => {
       unsubscribe = await connect();
     })();
@@ -268,8 +291,9 @@ function TabList() {
 
       <div
         className={`h-10 mb-3 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
+        onClick={() => (user.isOwner ? setIsExpanded((prev) => !prev) : null)}
       >
-        <AvatarCircles members={members} isExpanded={true}/>
+        <AvatarCircles members={members} isExpanded={isExpanded} onRemoveMember={handleRemoveMember}/>
       </div>
 
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pt-2 pb-32">
@@ -301,11 +325,15 @@ function TabList() {
       </div>
 
       <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md shadow-xl">
-        <SummaryList total borderTop summary={[
-          { name: "Subtotal", amount: share },
-          { name: "Tax", amount: tax },
-          ...(tip ? [{ name: "Tip", amount: tip }] : []),
-        ]} />
+        <SummaryList
+          total
+          borderTop
+          summary={[
+            { name: "Subtotal", amount: share },
+            { name: "Tax", amount: tax },
+            ...(tip ? [{ name: "Tip", amount: tip }] : []),
+          ]}
+        />
         <div className="flex items-center justify-evenly px-6 py-4 border-t border-gray-300">
           <input
             type="text"

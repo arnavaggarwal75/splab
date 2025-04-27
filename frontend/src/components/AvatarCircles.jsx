@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { RxCross2 } from "react-icons/rx";
 import { useUser } from "../contexts/UserContext";
 
@@ -10,22 +10,18 @@ const colors = [
   "bg-orange-400",
 ];
 
-function AvatarCircles({ members, isExpanded }) {
+function AvatarCircles({ members, isExpanded, onRemoveMember }) {
   const maxVisible = 5;
   const visibleMembers = members.slice(0, maxVisible);
   const extraCount = members.length - maxVisible;
-  const { name: currentName } = useUser();
-
-  useEffect(() => {
-    console.log("AvatarCircles rendered with members:", members);
-    console.log("Current user name:", currentName);
-  }, [members, currentName]);
+  const { user } = useUser();
+  const currentName = user.name;
 
   return (
     <div className="relative mt-2 mb-3">
       <div className="flex relative gap-0">
-        {visibleMembers.map((name, index) => {
-          const initials = name
+        {visibleMembers.map((member, index) => {
+          const initials = member.name
             .split(" ")
             .map((n) => n[0])
             .join("")
@@ -52,16 +48,25 @@ function AvatarCircles({ members, isExpanded }) {
       </div>
 
       {isExpanded && (
-        <div className="flex-col gap-1 absolute top-10 w-44 max-h z-10 bg-white border border-black/10 rounded-lg shadow-lg p-2">
-          {members.map((name, index) => {
+        <div className="flex-col flex gap-2 absolute top-10 left-1/2 -translate-x-1/2 w-56 max-h-56 overflow-y-scroll z-10 bg-white border border-black/10 rounded-lg shadow-lg py-3">
+          {members.map((member, index) => {
             return (
-              <div className="flex items-center justify-between" key={index}>
-                <div
-                  className={`flex items-center font-bold font-mono px-4 py-2`}
-                >
-                  {name}
-                </div>
-                {name !== currentName && <RxCross2 />}
+              <div
+                className="flex items-center justify-between px-4"
+                key={index}
+              >
+                <div className={`flex items-center font-mono`}>{member.name}</div>
+                {member.name !== currentName && (
+                  <button
+                    className="btn-pressable"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveMember(member.id);
+                    }}
+                  >
+                    <RxCross2 />
+                  </button>
+                )}
               </div>
             );
           })}

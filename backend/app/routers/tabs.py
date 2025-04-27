@@ -13,6 +13,7 @@ from app.db import (
     get_bill_summary,
     update_member_name,
     update_item_members,
+    remove_member_from_tab
 )
 from fastapi.responses import JSONResponse
 
@@ -195,4 +196,26 @@ async def update_member_name_api(tab_id: str, member_id: str, request: Request):
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"message": "Member updated successfully", "member": member}
+        )
+    
+@router.delete("/member/{tab_id}/{member_id}")
+async def delete_member_api(tab_id: str, member_id: str):
+    member = get_one_member(tab_id, member_id)
+    if member is None:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error": f"Member {member_id} not found in tab {tab_id}"}
+        )
+    else:
+        remove_member_from_tab(tab_id, member_id)
+        tab = get_tab(tab_id)
+        for item in tab.get("items", []):
+            members_in_item: list[dict] = item.get("members", [])
+            updated_members = [m for m in members_in_item if m.get("id") != member_id]
+            if members_in_item != updated_members: 
+                print("Updating members in item", item["id"], updated_members)
+                update_item_members(tab_id, item["id"], updated_members)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "Member deleted successfully"}
         )
