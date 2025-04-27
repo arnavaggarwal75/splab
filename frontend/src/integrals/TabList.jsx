@@ -248,7 +248,7 @@ function TabList() {
       <div
         className={`h-10 mb-3 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
       >
-        <AvatarCircles members={members} />
+        <AvatarCircles members={members} isExpanded={true}/>
       </div>
 
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pt-2 pb-32">
