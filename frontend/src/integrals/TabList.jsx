@@ -12,13 +12,14 @@ import logo from "../assets/logo.png";
 import BillItem from "../components/BillItem";
 import AvatarCircles from "../components/AvatarCircles";
 import SummaryList from "../components/SummaryList";
+import { IoExitOutline, IoExit } from "react-icons/io5";
 
 function TabList() {
   let [searchParams] = useSearchParams();
   let navigate = useNavigate();
 
   const { currentSocketRef, connectToSocket } = useSocket();
-  const { user, saveUser, getUser } = useUser();
+  const { user, saveUser, getUser, removeUser } = useUser();
   const joinedTab = useRef(false);
 
   const [items, setItems] = useState([]);
@@ -38,8 +39,10 @@ function TabList() {
     return name.split(" ")[0];
   };
 
-  const handleRemoveMember = async (memberId) => {
-    if (!user.isOwner || !window.confirm("Are you sure you want to remove this member?")) return;
+  const handleRemoveMember = async (memberId, leave) => {
+    if (!leave) {
+      if (!window.confirm("Are you sure you want to remove this member?")) return;
+    }
     try {
       const code = searchParams.get("code");
       await axiosClient.delete(`/tabs/member/${code}/${memberId}`);
@@ -48,7 +51,7 @@ function TabList() {
     } catch (error) {
       console.error("Error removing member:", error);
     }
-  };  
+  };
 
   const handleCheckbox = (index) => {
     const newCheckedState = !checkedItems[index];
@@ -284,6 +287,30 @@ function TabList() {
 
   return (
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">
+      <div className="absolute top-4 right-7">
+        <button
+          onClick={async () => {
+            if (window.confirm("Are you sure you want to leave the tab?")) {
+              try {
+                if (user.isOwner) {
+                  await axiosClient.delete(`/tabs/${searchParams.get("code")}`);
+                  removeUser();
+                  navigate("/");
+                } else {
+                  await handleRemoveMember(user.memberId, true);
+                  navigate("/");
+                }
+              } catch (error) {
+                console.error("Error leaving tab:", error);
+              }
+            }
+          }}
+          className="flex items-center justify-center transition bg-[var(--secondary)] p-2 rounded-lg"
+        >
+          <IoExitOutline size={22} color="white" />
+        </button>
+      </div>
+
       <h1 className="mt-3 text-lg font-bold">
         {user.isOwner ? "Your Tab" : ownerName + "'s Tab"}
       </h1>
@@ -293,7 +320,11 @@ function TabList() {
         className={`h-10 mb-3 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
         onClick={() => (user.isOwner ? setIsExpanded((prev) => !prev) : null)}
       >
-        <AvatarCircles members={members} isExpanded={isExpanded} onRemoveMember={handleRemoveMember}/>
+        <AvatarCircles
+          members={members}
+          isExpanded={isExpanded}
+          onRemoveMember={handleRemoveMember}
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pt-2 pb-32">

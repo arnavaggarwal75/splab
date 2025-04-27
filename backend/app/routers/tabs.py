@@ -207,6 +207,12 @@ async def delete_member_api(tab_id: str, member_id: str):
             content={"error": f"Member {member_id} not found in tab {tab_id}"}
         )
     else:
+        if member.get("is_owner"):
+            print("Cannot delete owner of the tab", member_id, member.get("is_owner"))
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"error": "Cannot delete the owner of the tab."}
+            )
         remove_member_from_tab(tab_id, member_id)
         tab = get_tab(tab_id)
         for item in tab.get("items", []):
