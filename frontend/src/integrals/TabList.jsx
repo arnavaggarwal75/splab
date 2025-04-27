@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
-
-import { RotatingLines } from "react-loader-spinner";
-
+import { ClipLoader } from "react-spinners";
 import axiosClient from "../api/axiosClient";
 import { useSocket } from "../contexts/SocketContext";
 import { useUser } from "../contexts/UserContext";
@@ -69,7 +67,7 @@ function TabList() {
       return;
     }
     if (!user && !getUser()) {
-      navigate(`/member-home?code=${code}`)
+      navigate(`/member-home?code=${code}`);
       return;
     }
     if (!user) {
@@ -80,8 +78,8 @@ function TabList() {
       const { code: tabId, memberId } = getUser();
       console.log("memberId", memberId);
       if (tabId == code) {
-        if(!memberId) {
-          navigate(`/member-home?code=${code}`)
+        if (!memberId) {
+          navigate(`/member-home?code=${code}`);
         }
         const response = await axiosClient.get(
           `/tabs/${code}/members/${memberId}`
@@ -93,9 +91,14 @@ function TabList() {
           paymentInfo: member.payment_info,
           isOwner: member.is_owner,
           name: user.name || member.name,
-        })
+        });
         if (user.name && member.name !== user.name) {
-          console.log("Updating name since member name was " + member.name + " and user name is " + user.name);
+          console.log(
+            "Updating name since member name was " +
+              member.name +
+              " and user name is " +
+              user.name
+          );
           axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
             name: user.name,
           });
@@ -118,7 +121,7 @@ function TabList() {
         ...user,
         memberId,
         code,
-      })
+      });
     };
 
     (async () => {
@@ -133,7 +136,7 @@ function TabList() {
 
   // useEffect after getting user.memberId
   useEffect(() => {
-    if(!user?.memberId) return;
+    if (!user?.memberId) return;
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -146,14 +149,14 @@ function TabList() {
               [item.id]: true,
             }));
           }
-        })
+        });
 
         setMembers([]);
         response.data.members.forEach((member) => {
           if (member.online || member.name == user.name) {
-            setMembers(prev => [...prev, member.name]);
+            setMembers((prev) => [...prev, member.name]);
           }
-        })
+        });
 
         setItems(response.data.items);
         setOwnerName(response.data.owner_name);
@@ -179,7 +182,7 @@ function TabList() {
           setMembers([]);
           collectionSnap.forEach((member) => {
             if (member.data().online || member.data().name == user.name) {
-              setMembers(prev => [...prev, member.data().name]);
+              setMembers((prev) => [...prev, member.data().name]);
             }
           });
         }
@@ -220,9 +223,9 @@ function TabList() {
         unsubscribeShare();
         unsubscribeItems();
       };
-    }
+    };
     getTabInfo();
-    let unsubscribe = () => { };
+    let unsubscribe = () => {};
     (async () => {
       unsubscribe = await connect();
     })();
@@ -248,13 +251,7 @@ function TabList() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <RotatingLines
-          strokeColor="grey"
-          strokeWidth="5"
-          animationDuration="0.75"
-          width="30"
-          visible={true}
-        />
+        <ClipLoader color="grey" size={30} />
       </div>
     );
   }
@@ -290,22 +287,20 @@ function TabList() {
             />
           ))
         ) : (
-          <RotatingLines
-            strokeColor="grey"
-            strokeWidth="5"
-            animationDuration="0.75"
-            width="30"
-            visible={true}
-          />
+          <ClipLoader color="grey" size={30} />
         )}
       </div>
 
       <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md shadow-xl">
-        <SummaryList total borderTop summary={[
-          { name: "Subtotal", amount: share },
-          { name: "Tax", amount: tax },
-          ...(tip ? [{ name: "Tip", amount: tip }] : []),
-        ]} />
+        <SummaryList
+          total
+          borderTop
+          summary={[
+            { name: "Subtotal", amount: share },
+            { name: "Tax", amount: tax },
+            ...(tip ? [{ name: "Tip", amount: tip }] : []),
+          ]}
+        />
         <div className="flex items-center justify-evenly px-6 py-4 border-t border-gray-300">
           <input
             type="text"

@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
-import { RotatingLines } from "react-loader-spinner";
-import { LiaEdit } from "react-icons/lia";
-
+import { ClipLoader } from "react-spinners";
 import axiosClient from "../api/axiosClient";
 import { useUser } from "../contexts/UserContext";
 import BillItem from "../components/BillItem";
@@ -63,15 +60,17 @@ function ConfirmUpload() {
   }, []);
 
   const createTab = () => {
-    axiosClient.post("/tabs/create", {
-      owner_name: user.name,
-      owner_payment_id: user.paymentInfo,
-      items,
-      tax: parseFloat(tax),
-      subtotal: parseFloat(subtotal),
-    }).then((response) => {
-      navigate(`/get-link?code=${response.data.tab_id}`);
-    });
+    axiosClient
+      .post("/tabs/create", {
+        owner_name: user.name,
+        owner_payment_id: user.paymentInfo,
+        items,
+        tax: parseFloat(tax),
+        subtotal: parseFloat(subtotal),
+      })
+      .then((response) => {
+        navigate(`/get-link?code=${response.data.tab_id}`);
+      });
   };
 
   const openEditModal = (item, index) => {
@@ -94,9 +93,9 @@ function ConfirmUpload() {
       setItems(updated);
       if (items[editIndex]) {
         const diff = updatedItem.price - items[editIndex].price;
-        setSubtotal(prev => parseFloat(prev) + parseFloat(diff));
+        setSubtotal((prev) => parseFloat(prev) + parseFloat(diff));
       } else {
-        setSubtotal(prev => parseFloat(prev) + parseFloat(updatedItem.price));
+        setSubtotal((prev) => parseFloat(prev) + parseFloat(updatedItem.price));
       }
     }
   };
@@ -106,7 +105,9 @@ function ConfirmUpload() {
     updated.splice(editIndex, 1);
     setItems(updated);
     setModalOpen(false);
-    setSubtotal(prev => parseFloat(prev) - parseFloat(items[editIndex].price));
+    setSubtotal(
+      (prev) => parseFloat(prev) - parseFloat(items[editIndex].price)
+    );
   };
 
   const handleAddItem = () => {
@@ -132,13 +133,7 @@ function ConfirmUpload() {
           ))
         ) : (
           <div className="flex flex-col items-center justify-center min-h-full">
-            <RotatingLines
-              strokeColor="grey"
-              strokeWidth="5"
-              animationDuration="0.75"
-              width="30"
-              visible={true}
-            />
+            <ClipLoader color="grey" size={30} />
           </div>
         )}
       </div>
@@ -149,10 +144,16 @@ function ConfirmUpload() {
         +
       </button>
       <div className="flex flex-col justify-evenly shadow-xl items-center bg-white/70 backdrop-blur-md w-full">
-        {items && <SummaryList borderTop total summary={[
-          { name: "Subtotal", amount: subtotal },
-          { name: "Tax", amount: tax },
-        ]} />}
+        {items && (
+          <SummaryList
+            borderTop
+            total
+            summary={[
+              { name: "Subtotal", amount: subtotal },
+              { name: "Tax", amount: tax },
+            ]}
+          />
+        )}
         <div className="px-6 py-4 flex justify-evenly items-center w-full">
           <button
             onClick={() => navigate("/upload")}

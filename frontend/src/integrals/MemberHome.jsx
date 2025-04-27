@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
-import { RotatingLines } from "react-loader-spinner";
-
+import { ClipLoader } from "react-spinners";
 import logo from "../assets/logo.png";
 import axiosClient from "../api/axiosClient";
 import { useUser } from "../contexts/UserContext";
@@ -49,13 +47,7 @@ const MemberHome = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200">
-        <RotatingLines
-          strokeColor="grey"
-          strokeWidth="5"
-          animationDuration="0.75"
-          width="30"
-          visible={true}
-        />
+        <ClipLoader color="grey" size={30} />
       </div>
     );
   }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-
-import { RotatingLines } from "react-loader-spinner";
-
+import { ClipLoader } from "react-spinners";
 import axiosClient from "../api/axiosClient";
 import { useUser } from "../contexts/UserContext";
 import logo from "../assets/logo.png";
@@ -24,15 +22,20 @@ const MemberFinal = () => {
     if (!code) {
       navigate("/");
     }
-    axiosClient.post(`/tabs/mark_paid/${code}/${user.memberId}`).then((response) => {
-      navigate("/member-success?code=" + code + "&member_id=" + user.memberId);
-    }).catch((error) => {
-      alert("Something went wrong", error);
-    });
+    axiosClient
+      .post(`/tabs/mark_paid/${code}/${user.memberId}`)
+      .then((response) => {
+        navigate(
+          "/member-success?code=" + code + "&member_id=" + user.memberId
+        );
+      })
+      .catch((error) => {
+        alert("Something went wrong", error);
+      });
   };
 
   useEffect(() => {
-    if(!user) {
+    if (!user) {
       return;
     }
     const code = searchParams.get("code");
@@ -61,22 +64,22 @@ const MemberFinal = () => {
             <div className="my-4 mx-auto bg-gray-100 shadow-inner p-2 rounded-2xl text-gray-800 text-md w-full max-w-xs">
               {paymentInfo}
             </div>
-            <SummaryList borderTop borderBottom summary={[
-              { name: "Subtotal", amount: subtotal },
-              { name: "Tax", amount: tax },
-              { name: "Tip", amount: tip },
-            ]} />
+            <SummaryList
+              borderTop
+              borderBottom
+              summary={[
+                { name: "Subtotal", amount: subtotal },
+                { name: "Tax", amount: tax },
+                { name: "Tip", amount: tip },
+              ]}
+            />
             <p className="text-lg mt-4">You owe:</p>
-            <p className="text-4xl font-bold mt-2">${sumMoney([subtotal, tax, tip])}</p>
+            <p className="text-4xl font-bold mt-2">
+              ${sumMoney([subtotal, tax, tip])}
+            </p>
           </div>
         ) : (
-          <RotatingLines
-            strokeColor="grey"
-            strokeWidth="5"
-            animationDuration="0.75"
-            width="30"
-            visible={true}
-          />
+          <ClipLoader color="grey" size={30} />
         )}
 
         <button
