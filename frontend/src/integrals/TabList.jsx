@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { doc, onSnapshot, collection } from "firebase/firestore";
 import { db } from "../../firebase";
-
-import { RotatingLines } from "react-loader-spinner";
-
+import { ClipLoader } from "react-spinners";
 import axiosClient from "../api/axiosClient";
 import { useSocket } from "../contexts/SocketContext";
 import { useUser } from "../contexts/UserContext";
@@ -86,7 +84,7 @@ function TabList() {
           await handleRemoveMember(user.memberId, true);
         }
         removeUser();
-        currentSocketRef.current.disconnect();
+        currentSocketRef.current?.disconnect();
         navigate("/");
       } catch (error) {
         console.error("Error leaving tab:", error);
@@ -175,7 +173,6 @@ function TabList() {
   // useEffect after getting user.memberId
   useEffect(() => {
     if (!user?.memberId) return;
-    console.log("Here", user.memberId);
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -272,7 +269,7 @@ function TabList() {
       };
     };
     getTabInfo();
-    let unsubscribe = () => { };
+    let unsubscribe = () => {};
     (async () => {
       unsubscribe = await connect();
     })();
@@ -298,13 +295,7 @@ function TabList() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <RotatingLines
-          strokeColor="grey"
-          strokeWidth="5"
-          animationDuration="0.75"
-          width="30"
-          visible={true}
-        />
+        <ClipLoader color="grey" size={30} />
       </div>
     );
   }
@@ -354,13 +345,7 @@ function TabList() {
             />
           ))
         ) : (
-          <RotatingLines
-            strokeColor="grey"
-            strokeWidth="5"
-            animationDuration="0.75"
-            width="30"
-            visible={true}
-          />
+          <ClipLoader color="grey" size={30} />
         )}
       </div>
 
