@@ -249,7 +249,10 @@ function TabList() {
             setTax(data.tax);
           }
         } else {
-          console.warn("Member document not found");
+          console.warn("Member document doesn't exist");
+          removeUser();
+          currentSocketRef.current.disconnect();
+          navigate("/");
         }
       });
 
