@@ -15,7 +15,7 @@ function AvatarCircles({ members, isExpanded, onRemoveMember }) {
   const visibleMembers = members.slice(0, maxVisible);
   const extraCount = members.length - maxVisible;
   const { user } = useUser();
-  const currentName = user.name;
+  const currentName = user?.name;
 
   return (
     <div className="relative mt-2 mb-3">

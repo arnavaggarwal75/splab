@@ -77,6 +77,22 @@ function TabList() {
     });
   };
 
+  const handleLeave = async () => {
+    if (window.confirm("Are you sure you want to leave the tab?")) {
+      try {
+        if (user.isOwner) {
+          await axiosClient.delete(`/tabs/${searchParams.get("code")}`);
+        } else {
+          await handleRemoveMember(user.memberId, true);
+        }
+        removeUser();
+        currentSocketRef.current.disconnect();
+        navigate("/");
+      } catch (error) {
+        console.error("Error leaving tab:", error);
+      }
+    }
+  }
   // initial useEffect
   useEffect(() => {
     const code = searchParams.get("code");
@@ -99,29 +115,33 @@ function TabList() {
         if (!memberId) {
           navigate(`/member-home?code=${code}`);
         }
-        const response = await axiosClient.get(
-          `/tabs/${code}/members/${memberId}`
-        );
-        const member = response.data.member;
-        console.log("Member here", member);
-        saveUser({
-          ...user,
-          paymentInfo: member.payment_info,
-          isOwner: member.is_owner,
-          name: user.name || member.name,
-        });
-        if (user.name && member.name !== user.name) {
-          console.log(
-            "Updating name since member name was " +
+        try {
+          const response = await axiosClient.get(
+            `/tabs/${code}/members/${memberId}`
+          );
+          const member = response.data.member;
+          saveUser({
+            ...user,
+            paymentInfo: member.payment_info,
+            isOwner: member.is_owner,
+            name: user.name || member.name,
+          });
+          if (user.name && member.name !== user.name) {
+            console.log(
+              "Updating name since member name was " +
               member.name +
               " and user name is " +
               user.name
-          );
-          axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
-            name: user.name,
-          });
+            );
+            axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
+              name: user.name,
+            });
+          }
+          return false;
+        } catch (error) {
+          console.warn("Member ID in storage is outdated");
+          return true;
         }
-        return false;
       }
       return true;
     };
@@ -155,6 +175,7 @@ function TabList() {
   // useEffect after getting user.memberId
   useEffect(() => {
     if (!user?.memberId) return;
+    console.log("Here", user.memberId);
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -248,7 +269,7 @@ function TabList() {
       };
     };
     getTabInfo();
-    let unsubscribe = () => {};
+    let unsubscribe = () => { };
     (async () => {
       unsubscribe = await connect();
     })();
@@ -289,22 +310,7 @@ function TabList() {
     <div className="flex flex-col items-center h-screen bg-white relative font-mono">
       <div className="absolute top-4 right-7">
         <button
-          onClick={async () => {
-            if (window.confirm("Are you sure you want to leave the tab?")) {
-              try {
-                if (user.isOwner) {
-                  await axiosClient.delete(`/tabs/${searchParams.get("code")}`);
-                  removeUser();
-                  navigate("/");
-                } else {
-                  await handleRemoveMember(user.memberId, true);
-                  navigate("/");
-                }
-              } catch (error) {
-                console.error("Error leaving tab:", error);
-              }
-            }
-          }}
+          onClick={handleLeave}
           className="flex items-center justify-center transition bg-[var(--secondary)] p-2 rounded-lg"
         >
           <IoExitOutline size={22} color="white" />
@@ -312,7 +318,7 @@ function TabList() {
       </div>
 
       <h1 className="mt-3 text-lg font-bold">
-        {user.isOwner ? "Your Tab" : ownerName + "'s Tab"}
+        {user?.isOwner ? "Your Tab" : ownerName + "'s Tab"}
       </h1>
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
