@@ -116,7 +116,10 @@ def set_member_online_status(tab_id: str, member_id: str, status: bool):
     if invalid_tab_id(tab_id): return None
     member_ref = tabs_collection.document(tab_id).collection("members").document(member_id)
     print("status", status)
-    member_ref.update({"online": status})
+    if member_ref.get().exists:
+        member_ref.update({"online": status})
+    else:
+        print(f"Member {member_id} does not exist in tab {tab_id}. Cannot set online status.")
 
 def remove_member_from_tab(tab_id: str, member_id: str):
     if invalid_tab_id(tab_id): return None

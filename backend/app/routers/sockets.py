@@ -33,8 +33,8 @@ async def connect(sid, environ):
     member_id = params.get('member_id', [None])[0] 
     print(f"[Socket.IO] tab_id: {tab_id} member_id: {member_id}")
     if not member_exists(tab_id, member_id):
-        print(f"A socket connection was attempted with a nonexistant user... not returning...")
-        return
+        print(f"A socket connection was attempted with a nonexistant user... returning...")
+        raise ConnectionRefusedError('User does not exist')
     print(f"Member id {member_id} connected to socket for tab {tab_id}")
     sid_associations[sid] = (tab_id, member_id)
     set_member_online_status(tab_id, member_id, True)

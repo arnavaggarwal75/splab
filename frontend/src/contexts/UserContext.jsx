@@ -36,6 +36,7 @@ export function UserProvider({ children }) {
 
   const removeUser = () => {
     localStorage.removeItem("splab_user");
+    setUser(null);
   }
 
   return (
