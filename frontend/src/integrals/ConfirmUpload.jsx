@@ -19,7 +19,7 @@ function ConfirmUpload() {
 
   const [items, setItems] = useState(null);
   const [subtotal, setSubtotal] = useState(null);
-  const [tax, setTax] = useState(null);
+  const [fees, setFees] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -38,24 +38,21 @@ function ConfirmUpload() {
         navigate("/upload");
         return;
       }
-      const response = await axiosClient.post("/ocr/extract", formData, {
+
+      const response = await axiosClient.post("/ocr/v2/extract", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      const newItems = [];
-      for (const item of response.data.items) {
-        for (let i = 0; i < parseInt(item[2]); i++) {
-          newItems.push({
-            name: item[0],
-            price: parseFloat(item[1]),
-          });
-        }
-      }
-      setItems(newItems);
-      setTax(response.data.tax);
-      setSubtotal(response.data.sub_total);
+      setItems(response.data.items);
+      setFees(response.data.fees);
+      setSubtotal(() => {
+        let sum = 0;
+        response.data.items.forEach(item => {
+          sum += item.price
+        })
+        return sum;
+      })
     })();
   }, []);
 
@@ -148,10 +145,7 @@ function ConfirmUpload() {
           <SummaryList
             borderTop
             total
-            summary={[
-              { name: "Subtotal", amount: subtotal },
-              { name: "Tax", amount: tax },
-            ]}
+            summary={[...fees, { "name": "Subtotal", "amount": subtotal }]}
           />
         )}
         <div className="px-6 py-4 flex justify-evenly items-center w-full">

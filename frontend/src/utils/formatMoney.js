@@ -1,4 +1,7 @@
 export const roundMoney = (amount) => {
+  if(!amount) {
+    return "0.00";
+  }
   return (Math.round(parseFloat(amount) * 100) / 100).toFixed(2);
 }
 
