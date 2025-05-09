@@ -25,6 +25,7 @@ function OwnerFinal() {
 
     axiosClient.get(`/tabs/${tabId}/owner_summary`).then((response) => {
       setBillSummary(response.data.bill_summary)
+      console.log(response.data.bill_summary.fees)
       setMembers(response.data.members)
     }).catch((error) => {
       console.error("Error fetching initial members:", error);
@@ -87,7 +88,7 @@ function OwnerFinal() {
           </p>
           <SummaryList total borderTop fullWidth summary={[
             { name: "Subtotal", amount: billSummary.subtotal },
-            ...billSummary.fees,
+            ...(billSummary.fees ?? []),
             { name: "Total Tip", amount: billSummary.total_tip },
           ]} />
         </div>
