@@ -6,7 +6,6 @@ export const roundMoney = (amount) => {
 }
 
 export const sumMoney = (amounts) => {
-  console.log(amounts)
   let sum = 0;
   amounts.forEach(curr => {
     if(Array.isArray(curr)) {
