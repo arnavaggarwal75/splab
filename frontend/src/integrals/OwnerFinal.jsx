@@ -75,7 +75,7 @@ function OwnerFinal() {
                 <MemberSplit
                   key={member.id}
                   name={member.name || "Unknown"}
-                  share={sumMoney([member.share, member.tax, member.tip])}
+                  share={sumMoney([member.share, member.fee_share, member.tip])}
                   submitted={!!member.paid}
                 />
               ) : null
