@@ -51,7 +51,7 @@ def get_items_in_tab(tab_id: str):
 def get_bill_summary(tab_id: str):
     if invalid_tab_id(tab_id): return None
     tab = tabs_collection.document(tab_id).get().to_dict()
-    needed_keys = ["subtotal", "total_tip", "tax"]
+    needed_keys = ["subtotal", "total_tip", "fees"]
     return {k: v for k, v in tab.items() if k in needed_keys}
 
 def get_subtotal(tab_id: str):

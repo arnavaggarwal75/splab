@@ -87,7 +87,7 @@ function OwnerFinal() {
           </p>
           <SummaryList total borderTop fullWidth summary={[
             { name: "Subtotal", amount: billSummary.subtotal },
-            { name: "Tax", amount: billSummary.tax },
+            ...billSummary.fees,
             { name: "Total Tip", amount: billSummary.total_tip },
           ]} />
         </div>
