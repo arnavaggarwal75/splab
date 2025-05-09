@@ -8,10 +8,10 @@ from app.db import (
     get_member_share,
     get_item_cost,
     get_members_in_tab,
+    get_tab_fees,
     mark_member_submitted,
     member_exists,
     set_member_online_status,
-    get_total_tax,
     get_subtotal,
     update_member_tip,
     increase_total_tip,
@@ -81,7 +81,6 @@ async def update_checkbox(sid, data):
     members_to_update = [m.get("id") for m in get_members_in_item(tab_id, item_id)]
     num_members = len(members_to_update)
     item_cost = get_item_cost(tab_id, item_id)
-    total_tax = get_total_tax(tab_id)
     subtotal = get_subtotal(tab_id)
     if checked:
         for member in members_to_update:
@@ -91,19 +90,24 @@ async def update_checkbox(sid, data):
             else: # decrease share
                 share -= item_cost / (num_members - 1)
                 share += item_cost / num_members
-            tax = share / subtotal * total_tax
-            update_member_share(tab_id, member, share, tax)
+            fee_share = recalculate_fee_share(share, subtotal, get_tab_fees(tab_id))
+            update_member_share(tab_id, member, share, fee_share)
     else: # checkbox was unchecked
         for member in members_to_update:
             share = get_member_share(tab_id, member)
             share -= item_cost / (num_members + 1)
             share += item_cost / num_members
-            tax = share / subtotal * total_tax
-            update_member_share(tab_id, member, share, tax)
+            fee_share = recalculate_fee_share(share, subtotal, get_tab_fees(tab_id))
+            update_member_share(tab_id, member, share, fee_share)
         share = get_member_share(tab_id, member_id)
         share -= item_cost / (num_members + 1)
-        tax = share / subtotal * total_tax
-        update_member_share(tab_id, member_id, share, tax)
+        fee_share = recalculate_fee_share(share, subtotal, get_tab_fees(tab_id))
+        update_member_share(tab_id, member_id, share, fee_share)
+
+def recalculate_fee_share(share, subtotal, tab_fees):
+    partition = share / subtotal
+    return [{'name': fee['name'], 'amount': fee['amount'] * partition} for fee in tab_fees]
+    
 
 # ASGI app to mount into FastAPI
 socket_app = socketio.ASGIApp(sio)

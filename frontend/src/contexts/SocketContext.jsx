@@ -34,12 +34,11 @@ export const SocketProvider = ({ children }) => {
 
       socketRef.current.on("connect", () => {
         attemptConnect.current = true;
-        console.log("Connected:", socketRef.current.id);
+        console.log("Connected:", socketRef.current);
       })
 
       socketRef.current.on("disconnect", () => {
         attemptConnect.current = false;
-        socketRef.current = null;
         console.log("❌ Disconnected");
       });
 

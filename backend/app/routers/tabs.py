@@ -7,6 +7,7 @@ from app.db import (
     get_members_in_tab,
     get_payment_info,
     get_tab,
+    get_tab_fees,
     add_member_to_tab,
     get_owner_name,
     get_one_member,
@@ -31,11 +32,11 @@ async def create_tab_api(request: Request):
     body: dict = await request.json()
     owner_name: str = body.get("owner_name")
     owner_payment_id: str = body.get("owner_payment_id")
-    tax: float = body.get("tax")
     subtotal: float = body.get("subtotal")
     items: list[dict] = body.get("items")
+    fees: list[dict] = body.get("fees")
 
-    tab_id = create_tab(items, owner_name, owner_payment_id, tax, subtotal)
+    tab_id = create_tab(items, fees, owner_name, owner_payment_id, subtotal)
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content={"tab_id": tab_id}
@@ -47,6 +48,8 @@ async def add_member_to_tab_api(request: Request):
     tab_id = body.get("tab_id")
     name = body.get("name")
     is_owner = body.get("is_owner")
+    fees = get_tab_fees(tab_id)
+    fees = [{'name': fee['name'], 'amount': 0.0} for fee in fees]
     if is_owner:
         payment_info = body.get("payment_info")
         member : dict = {
@@ -56,7 +59,7 @@ async def add_member_to_tab_api(request: Request):
             "submitted": False,
             "online": False,
             "share": 0.0,
-            "tax": 0.0,
+            "fee_share": fees,
         }
         member_id = add_member_to_tab(tab_id, member)
     else:
@@ -67,7 +70,7 @@ async def add_member_to_tab_api(request: Request):
             "submitted": False,
             "online": False,
             "share": 0.0,
-            "tax": 0.0,
+            "fee_share": fees,
         }
         member_id = add_member_to_tab(tab_id, member)
         print("Member_id", member_id)

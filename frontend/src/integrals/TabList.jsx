@@ -25,7 +25,7 @@ function TabList() {
 
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
-  const [tax, setTax] = useState(0);
+  const [feeShare, setFeeShare] = useState({});
 
   const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
@@ -242,8 +242,8 @@ function TabList() {
           if (data.share !== undefined) {
             setShare(data.share);
           }
-          if (data.tax !== undefined) {
-            setTax(data.tax);
+          if (data.fee_share !== undefined) {
+            setFeeShare(data.fee_share);
           }
         } else {
           console.warn("Member document doesn't exist");
@@ -355,7 +355,7 @@ function TabList() {
           borderTop
           summary={[
             { name: "Subtotal", amount: share },
-            { name: "Tax", amount: tax },
+            ...feeShare,
             ...(tip ? [{ name: "Tip", amount: tip }] : []),
           ]}
         />

@@ -62,7 +62,7 @@ function ConfirmUpload() {
         owner_name: user.name,
         owner_payment_id: user.paymentInfo,
         items,
-        tax: parseFloat(tax),
+        fees,
         subtotal: parseFloat(subtotal),
       })
       .then((response) => {
@@ -71,29 +71,20 @@ function ConfirmUpload() {
   };
 
   const openEditModal = (item, index) => {
-    if (item.name == "Tax") {
-      setEditItem({ name: "Tax", price: tax });
-      setModalOpen(true);
-    } else {
-      setEditItem(item);
-      setEditIndex(index);
-      setModalOpen(true);
-    }
+    setEditItem(item);
+    setEditIndex(index);
+    setModalOpen(true);
   };
 
   const handleSaveItem = (updatedItem) => {
-    if (updatedItem.name === "Tax") {
-      setTax(updatedItem.price);
+    const updated = [...items];
+    updated[editIndex] = updatedItem;
+    setItems(updated);
+    if (items[editIndex]) {
+      const diff = updatedItem.price - items[editIndex].price;
+      setSubtotal((prev) => parseFloat(prev) + parseFloat(diff));
     } else {
-      const updated = [...items];
-      updated[editIndex] = updatedItem;
-      setItems(updated);
-      if (items[editIndex]) {
-        const diff = updatedItem.price - items[editIndex].price;
-        setSubtotal((prev) => parseFloat(prev) + parseFloat(diff));
-      } else {
-        setSubtotal((prev) => parseFloat(prev) + parseFloat(updatedItem.price));
-      }
+      setSubtotal((prev) => parseFloat(prev) + parseFloat(updatedItem.price));
     }
   };
 
