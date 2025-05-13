@@ -15,7 +15,7 @@ from google.genai import types
 from ..utils import parse_xml
 
 # v1 setup
-setup_v1 = false
+setup_v1 = False
 if setup_v1:
     if not os.path.isdir('receipt_model'):
         pipe = pipeline("image-to-text", model="selvakumarcts/sk_invoice_receipts")
