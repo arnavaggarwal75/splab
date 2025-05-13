@@ -15,19 +15,21 @@ from google.genai import types
 from ..utils import parse_xml
 
 # v1 setup
-if not os.path.isdir('receipt_model'):
-    # pipe = pipeline("image-to-text", model="selvakumarcts/sk_invoice_receipts")
-    # pipe.save_pretrained('receipt_model')
-    pass
-else:
-    # pipe = pipeline('image-to-text', 'receipt_model')
-    pass
+setup_v1 = false
+if setup_v1:
+    if not os.path.isdir('receipt_model'):
+        pipe = pipeline("image-to-text", model="selvakumarcts/sk_invoice_receipts")
+        pipe.save_pretrained('receipt_model')
+        pass
+    else:
+        pipe = pipeline('image-to-text', 'receipt_model')
+        pass
 
-def extract_receipt_info(file_data: bytes, filename: str):
-    image = Image.open(io.BytesIO(file_data))
-    xml_text = pipe(images=image)[0]['generated_text']
-    receipt_dict = parse_xml.receipt_xml_to_dict(xml_text)
-    return {"filename": filename, "data": receipt_dict}
+    def extract_receipt_info(file_data: bytes, filename: str):
+        image = Image.open(io.BytesIO(file_data))
+        xml_text = pipe(images=image)[0]['generated_text']
+        receipt_dict = parse_xml.receipt_xml_to_dict(xml_text)
+        return {"filename": filename, "data": receipt_dict}
 
 # v2 setup
 load_dotenv()
@@ -91,6 +93,11 @@ router = APIRouter(
 
 @router.post("/v1/extract")
 async def extract_receipt_v1(file: UploadFile):
+    if not setup_v1:
+        return JSONResponse(
+            status_code=301,
+            content={"error": "Extraction version not initialized"}
+        )
     image_data = await file.read()
     result = extract_receipt_info(image_data, file.filename or "")
     return result['data']
