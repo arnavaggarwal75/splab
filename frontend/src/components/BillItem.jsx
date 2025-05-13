@@ -1,6 +1,8 @@
 import NameTag from "./NameTag";
 import { LiaEdit } from "react-icons/lia";
 
+import { roundMoney } from "../utils/formatMoney.js";
+
 const BillItem = ({
   index,
   name,
@@ -18,7 +20,7 @@ const BillItem = ({
       <div className="flex items-center">
         <p className="mr-4 text-sm opacity-70">{index}.</p>
         <p className="flex-1 font-normal text-sm tracking-wide">{name}</p>
-        <p className="mr-4 text-sm font-bold text-secondary">${price}</p>
+        <p className="mr-4 text-sm font-bold text-secondary">${roundMoney(price)}</p>
         {checkboxDisabled ? (
           <LiaEdit className={`${onClick ? "btn-pressable" : ""}`} onClick={onClick}/>
         ) : (

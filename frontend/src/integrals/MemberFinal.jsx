@@ -13,7 +13,7 @@ const MemberFinal = () => {
   const { user, setUser } = useUser();
 
   const [tip, setTip] = useState(null);
-  const [tax, setTax] = useState(null);
+  const [feeShare, setFeeShare] = useState(null);
   const [subtotal, setSubtotal] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState(null);
 
@@ -44,7 +44,7 @@ const MemberFinal = () => {
       return;
     }
     axiosClient.get(`/tabs/share/${code}/${user.memberId}`).then((response) => {
-      setTax(response.data.member.tax);
+      setFeeShare(response.data.member.fee_share);
       setTip(response.data.member.tip);
       setSubtotal(response.data.member.share);
       setPaymentInfo(response.data.payment_info);
@@ -67,15 +67,16 @@ const MemberFinal = () => {
             <SummaryList
               borderTop
               borderBottom
+              fullWidth
               summary={[
                 { name: "Subtotal", amount: subtotal },
-                { name: "Tax", amount: tax },
+                ...(feeShare.length > 1 ? [{ "name": "Fees", "inner": feeShare }] : feeShare), 
                 { name: "Tip", amount: tip },
               ]}
             />
             <p className="text-lg mt-4">You owe:</p>
             <p className="text-4xl font-bold mt-2">
-              ${sumMoney([subtotal, tax, tip])}
+              ${sumMoney([subtotal, feeShare, tip])}
             </p>
           </div>
         ) : (

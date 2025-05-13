@@ -19,7 +19,7 @@ function ConfirmUpload() {
 
   const [items, setItems] = useState(null);
   const [subtotal, setSubtotal] = useState(null);
-  const [tax, setTax] = useState(null);
+  const [fees, setFees] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -38,24 +38,22 @@ function ConfirmUpload() {
         navigate("/upload");
         return;
       }
-      const response = await axiosClient.post("/ocr/extract", formData, {
+
+      const response = await axiosClient.post("/ocr/v2/extract", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      const newItems = [];
-      for (const item of response.data.items) {
-        for (let i = 0; i < parseInt(item[2]); i++) {
-          newItems.push({
-            name: item[0],
-            price: parseFloat(item[1]),
-          });
-        }
-      }
-      setItems(newItems);
-      setTax(response.data.tax);
-      setSubtotal(response.data.sub_total);
+      setItems(response.data.items);
+      setFees(response.data.fees);
+      console.log(response.data.fees);
+      setSubtotal(() => {
+        let sum = 0;
+        response.data.items.forEach(item => {
+          sum += item.price
+        })
+        return sum;
+      })
     })();
   }, []);
 
@@ -65,7 +63,7 @@ function ConfirmUpload() {
         owner_name: user.name,
         owner_payment_id: user.paymentInfo,
         items,
-        tax: parseFloat(tax),
+        fees,
         subtotal: parseFloat(subtotal),
       })
       .then((response) => {
@@ -74,29 +72,20 @@ function ConfirmUpload() {
   };
 
   const openEditModal = (item, index) => {
-    if (item.name == "Tax") {
-      setEditItem({ name: "Tax", price: tax });
-      setModalOpen(true);
-    } else {
-      setEditItem(item);
-      setEditIndex(index);
-      setModalOpen(true);
-    }
+    setEditItem(item);
+    setEditIndex(index);
+    setModalOpen(true);
   };
 
   const handleSaveItem = (updatedItem) => {
-    if (updatedItem.name === "Tax") {
-      setTax(updatedItem.price);
+    const updated = [...items];
+    updated[editIndex] = updatedItem;
+    setItems(updated);
+    if (items[editIndex]) {
+      const diff = updatedItem.price - items[editIndex].price;
+      setSubtotal((prev) => parseFloat(prev) + parseFloat(diff));
     } else {
-      const updated = [...items];
-      updated[editIndex] = updatedItem;
-      setItems(updated);
-      if (items[editIndex]) {
-        const diff = updatedItem.price - items[editIndex].price;
-        setSubtotal((prev) => parseFloat(prev) + parseFloat(diff));
-      } else {
-        setSubtotal((prev) => parseFloat(prev) + parseFloat(updatedItem.price));
-      }
+      setSubtotal((prev) => parseFloat(prev) + parseFloat(updatedItem.price));
     }
   };
 
@@ -149,8 +138,8 @@ function ConfirmUpload() {
             borderTop
             total
             summary={[
-              { name: "Subtotal", amount: subtotal },
-              { name: "Tax", amount: tax },
+              ...(fees.length > 1 ? [{ "name": "Fees", "inner": fees }] : fees), 
+              { "name": "Subtotal", "amount": subtotal }
             ]}
           />
         )}

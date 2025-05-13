@@ -18,9 +18,6 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   const connectToSocket = (memberId, tabId) => {
-    console.log("Attempting connection with", memberId, tabId);
-    console.log("Socketref", socketRef.current);
-    console.log("Attempted", attemptConnect.current);
     if(!socketRef.current && !attemptConnect.current) {
       socketRef.current = io(import.meta.env.VITE_API_URL, {
         query: {
@@ -34,12 +31,11 @@ export const SocketProvider = ({ children }) => {
 
       socketRef.current.on("connect", () => {
         attemptConnect.current = true;
-        console.log("Connected:", socketRef.current.id);
+        console.log("Connected:", socketRef.current);
       })
 
       socketRef.current.on("disconnect", () => {
         attemptConnect.current = false;
-        socketRef.current = null;
         console.log("❌ Disconnected");
       });
 
