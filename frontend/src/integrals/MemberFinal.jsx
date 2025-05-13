@@ -67,9 +67,10 @@ const MemberFinal = () => {
             <SummaryList
               borderTop
               borderBottom
+              fullWidth
               summary={[
                 { name: "Subtotal", amount: subtotal },
-                ...(feeShare ?? []),
+                ...(feeShare.length > 1 ? [{ "name": "Fees", "inner": feeShare }] : feeShare), 
                 { name: "Tip", amount: tip },
               ]}
             />

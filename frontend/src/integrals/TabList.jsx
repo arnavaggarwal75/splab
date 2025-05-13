@@ -25,7 +25,7 @@ function TabList() {
 
   const [tip, setTip] = useState("");
   const [share, setShare] = useState(0);
-  const [feeShare, setFeeShare] = useState({});
+  const [feeShare, setFeeShare] = useState(null);
 
   const [members, setMembers] = useState([]);
   const [ownerName, setOwnerName] = useState("");
@@ -108,8 +108,7 @@ function TabList() {
 
     const getMemberId = async () => {
       const { code: tabId, memberId } = getUser();
-      console.log("memberId", memberId);
-      if (tabId == code) {
+      if (tabId === code) {
         if (!memberId) {
           navigate(`/member-home?code=${code}`);
         }
@@ -172,7 +171,7 @@ function TabList() {
 
   // useEffect after getting user.memberId
   useEffect(() => {
-    if (!user?.memberId) return;
+    if (!user?.memberId || user.code !== searchParams.get("code")) return;
     const code = searchParams.get("code");
     const getTabInfo = async () => {
       // get items + tab info
@@ -355,7 +354,7 @@ function TabList() {
           borderTop
           summary={[
             { name: "Subtotal", amount: share },
-            ...feeShare,
+            ...(!feeShare ? [] : (feeShare.length > 1 ? [{ "name": "Fees", "inner": feeShare }] : feeShare)), 
             ...(tip ? [{ name: "Tip", amount: tip }] : []),
           ]}
         />

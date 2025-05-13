@@ -46,6 +46,7 @@ function ConfirmUpload() {
       });
       setItems(response.data.items);
       setFees(response.data.fees);
+      console.log(response.data.fees);
       setSubtotal(() => {
         let sum = 0;
         response.data.items.forEach(item => {
@@ -136,7 +137,10 @@ function ConfirmUpload() {
           <SummaryList
             borderTop
             total
-            summary={[...fees, { "name": "Subtotal", "amount": subtotal }]}
+            summary={[
+              ...(fees.length > 1 ? [{ "name": "Fees", "inner": fees }] : fees), 
+              { "name": "Subtotal", "amount": subtotal }
+            ]}
           />
         )}
         <div className="px-6 py-4 flex justify-evenly items-center w-full">
