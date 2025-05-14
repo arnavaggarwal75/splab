@@ -8,4 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  define: {
+    APP_VERSION: JSON.stringify(process.env.npm_package_version),
+  },
 })
