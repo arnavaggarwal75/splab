@@ -46,14 +46,14 @@ const MemberHome = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200">
+      <div className="flex flex-col items-center justify-center min-h-[100svh] bg-purple-200">
         <ClipLoader color="grey" size={30} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-purple-200">
+    <div className="flex flex-col items-center justify-center min-h-[100svh] bg-purple-200">
       <div className="bg-white p-15 py-5 flex flex-col items-center justify-center rounded-2xl w-[80%] shadow-lg">
         <img
           src={logo}

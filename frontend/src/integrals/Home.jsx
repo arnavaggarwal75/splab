@@ -49,7 +49,7 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-purple-200">
+    <div className="min-h-[100svh] flex flex-col bg-purple-200">
       <div className="flex flex-col items-center justify-center flex-grow">
         <div className="bg-white p-15 py-5 flex flex-col items-center justify-center rounded-2xl w-[80%] shadow-lg">
           <img

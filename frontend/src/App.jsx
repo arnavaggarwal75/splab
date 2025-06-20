@@ -26,7 +26,7 @@ function App() {
   }, [user])
 
   return (
-    <div className="h-full">
+    <div className="h-[100svh]">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
