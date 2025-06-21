@@ -293,14 +293,14 @@ function TabList() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-[100svh]">
         <ClipLoader color="grey" size={30} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center h-screen bg-white relative font-mono">
+    <div className="flex flex-col items-center h-[100svh] bg-white relative font-mono">
       <div className="absolute top-4 right-7">
         <button
           onClick={handleLeave}
@@ -316,7 +316,7 @@ function TabList() {
       <h2 className="text-sm">{searchParams.get("code")}</h2>
 
       <div
-        className={`h-10 mb-3 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
+        className={`h-10 transition-opacity duration-300 ${members.length > 0 ? "opacity-100" : "opacity-0"}`}
         onClick={() => (user.isOwner ? setIsExpanded((prev) => !prev) : null)}
       >
         <AvatarCircles
@@ -326,7 +326,7 @@ function TabList() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pt-2 pb-32">
+      <div className="flex-1 overflow-y-scroll w-[86%] flex flex-col gap-2 py-2">
         {items ? (
           items.map((item, idx) => (
             <BillItem
@@ -348,7 +348,7 @@ function TabList() {
         )}
       </div>
 
-      <div className="fixed bottom-0 w-full bg-white/70 backdrop-blur-md shadow-xl">
+      <div className="w-full bg-white/70 backdrop-blur-md shadow-xl">
         <SummaryList
           total
           borderTop

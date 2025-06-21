@@ -106,9 +106,9 @@ function ConfirmUpload() {
   };
 
   return (
-    <div className="relative h-screen flex flex-col items-center justify-between font-mono bg-white">
+    <div className="relative h-[100svh] flex flex-col items-center justify-between font-mono bg-white">
       <h1 className="m-5 text-lg font-bold">Does this look good?</h1>
-      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2 pb-24">
+      <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2">
         {items ? (
           items.map((item, index) => (
             <BillItem
@@ -121,7 +121,7 @@ function ConfirmUpload() {
             />
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center min-h-full">
+          <div className="flex flex-col items-center justify-center flex-grow">
             <ClipLoader color="grey" size={30} />
           </div>
         )}

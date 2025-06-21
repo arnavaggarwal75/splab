@@ -25,12 +25,12 @@ const Bill = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-purple-100 p-6 font-mono">
+    <div className="min-h-[100svh] flex flex-col items-center justify-center bg-purple-100 p-6 font-mono">
       <h2 className="text-2xl font-semibold mb-6">Upload your bill</h2>
 
       {!selectedImage ? (
         <label className="w-full flex flex-col items-center justify-center border-2 border-dashed bg-white p-6 rounded-xl shadow-md cursor-pointer">
-          <div className="flex flex-col items-center justify-center gap-2 text-gray-500 mb-2">
+          <div className="flex flex-col items-center text-center justify-center gap-2 text-gray-500 mb-2">
             <FaCamera className="w-20 h-20"/>
             Tap to take a picture or upload
           </div>
