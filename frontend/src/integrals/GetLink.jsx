@@ -7,18 +7,24 @@ const GetLink = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [shareLink, setShareLink] = useState("localhost:5173/member-home?code=PLACEHOLDER")
+  const [shareLink, setShareLink] = useState(`${import.meta.env.VITE_HOST_LINK}/member-home?code=PLACEHOLDER`)
 
   useEffect(() => {
     const code = searchParams.get("code")
-    if(!code) {
+    if (!code) {
       navigate("/")
     }
     setShareLink((prev) => prev.replace("PLACEHOLDER", code))
   }, [searchParams])
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareLink);
+    try {
+      navigator.clipboard.writeText(shareLink)
+        .then(() => alert('Copied!'))
+    } catch {
+      alert('To be implemented');
+    }
+
   };
 
   return (
