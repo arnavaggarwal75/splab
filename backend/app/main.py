@@ -9,7 +9,7 @@ from .routers import tabs
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://192.168.1.75:5173"],
+    allow_origins=["http://localhost:5173", "http://192.168.1.75:5173", "https://splab-a26f8.web.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
