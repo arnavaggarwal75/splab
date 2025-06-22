@@ -124,12 +124,6 @@ function TabList() {
             name: user.name || member.name,
           });
           if (user.name && member.name !== user.name) {
-            console.log(
-              "Updating name since member name was " +
-              member.name +
-              " and user name is " +
-              user.name
-            );
             axiosClient.put(`/tabs/member_name/${code}/${memberId}`, {
               name: user.name,
             });
@@ -161,7 +155,6 @@ function TabList() {
 
     (async () => {
       const needToJoin = await getMemberId();
-      console.log(needToJoin);
       if (!joinedTab.current && needToJoin) {
         joinedTab.current = true;
         await joinTab();

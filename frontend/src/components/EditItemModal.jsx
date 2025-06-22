@@ -6,7 +6,6 @@ const EditItemModal = ({ isOpen, onClose, onSave, onDelete, item }) => {
 
   useEffect(() => {
     if (isOpen) {
-      console.log("item: ", item);
       setName(item?.name || "");
       setPrice(item?.price?.toString() || "");
     }
