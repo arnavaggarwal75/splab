@@ -29,7 +29,7 @@ function App() {
   }, [user])
 
   return (
-    <div className="h-[100svh] overflow-hidden fixed inset-0 outline-red-500">
+    <div className="h-[100svh] overflow-hidden fixed inset-0">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

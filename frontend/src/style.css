@@ -10,7 +10,6 @@
 
 html, body {
   touch-action: pan-x pan-y;
-  border: 2px solid black;
   padding: 0;
   margin: 0;
   overflow: hidden;
