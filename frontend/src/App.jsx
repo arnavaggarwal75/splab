@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { useUser } from "./contexts/UserContext";
+import { useKeyboardFix } from "./utils/keyboardFix";
 import Home from "./integrals/Home";
 import TabList from "./integrals/TabList";
 import MemberFinal from "./integrals/MemberFinal";
@@ -15,6 +16,8 @@ import OwnerFinal from "./integrals/OwnerFinal";
 import MemberSuccess from "./integrals/MemberSuccess";
 
 function App() {
+  useKeyboardFix();
+
   const { user, restoreUser } = useUser();
   useEffect(() => {
     restoreUser();
@@ -26,7 +29,7 @@ function App() {
   }, [user])
 
   return (
-    <div className="h-[100svh]">
+    <div className="h-[100svh] overflow-hidden fixed inset-0 outline-red-500">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

@@ -106,7 +106,7 @@ function ConfirmUpload() {
   };
 
   return (
-    <div className="relative h-[100svh] flex flex-col items-center justify-between font-mono bg-white">
+    <div className="relative h-full flex flex-col items-center justify-between font-mono bg-white">
       <h1 className="m-5 text-lg font-bold">Does this look good?</h1>
       <div className="flex-1 overflow-y-auto w-[86%] scrollnone flex flex-col gap-2">
         {items ? (

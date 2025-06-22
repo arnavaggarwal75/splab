@@ -28,7 +28,7 @@ const GetLink = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[100svh] bg-purple-200 px-8 text-center font-mono">
+    <div className="flex flex-col items-center justify-center min-h-full bg-purple-200 px-8 text-center font-mono">
       <div className="bg-white p-8 py-6 flex flex-col items-center justify-center rounded-2xl w-[80%] shadow-lg">
         <img
           src={logo}

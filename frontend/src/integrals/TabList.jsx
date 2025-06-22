@@ -293,14 +293,14 @@ function TabList() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[100svh]">
+      <div className="flex flex-col items-center justify-center min-h-full">
         <ClipLoader color="grey" size={30} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center h-[100svh] bg-white relative font-mono">
+    <div className="flex flex-col items-center h-full bg-white relative font-mono">
       <div className="absolute top-4 right-7">
         <button
           onClick={handleLeave}

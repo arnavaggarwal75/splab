@@ -25,7 +25,7 @@ const Bill = () => {
   };
 
   return (
-    <div className="min-h-[100svh] flex flex-col items-center justify-center bg-purple-100 p-6 font-mono">
+    <div className="min-h-full flex flex-col items-center justify-center bg-purple-100 p-6 font-mono">
       <h2 className="text-2xl font-semibold mb-6">Upload your bill</h2>
 
       {!selectedImage ? (
