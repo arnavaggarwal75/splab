@@ -28,5 +28,5 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 USER appuser
 COPY app/ .
 EXPOSE 8000
-CMD ["fastapi", "run", "app/main.py"]
+CMD ["fastapi", "run", "main.py"]
 
