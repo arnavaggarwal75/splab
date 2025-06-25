@@ -1,0 +1,6 @@
+# Docker ignore files
+__pycache__/
+test_receipts/
+receipt_model/
+venv/
+.env
