@@ -15,6 +15,7 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
+          npm install
           npm run build
 
       - name: Deploy to firebase hosting
