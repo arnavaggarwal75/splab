@@ -12,7 +12,7 @@ export function useKeyboardFix() {
 
     return () => {
       inputs.forEach((input) => {
-        input.removeEventListener("blur");
+        input.removeEventListener("blur", () => {});
       })
     }
   }, []);

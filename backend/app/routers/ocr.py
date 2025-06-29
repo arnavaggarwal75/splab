@@ -4,8 +4,8 @@ import os
 from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
 # v1 dependencies
-from PIL import Image
-from transformers import pipeline
+# from PIL import Image
+# from transformers import pipeline
 
 # v2 dependencies
 import json
