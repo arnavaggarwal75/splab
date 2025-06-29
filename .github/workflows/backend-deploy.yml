@@ -31,15 +31,15 @@ jobs:
     - name: Build and push Docker image
       run: |
         cd backend
-        docker build -t ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
+        docker build -t ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest .
         docker push ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
 
     - name: Deploy to Pepper
       uses: actions-hub/kubectl@master
       env:
         KUBE_HOST: ${{ secrets.KUBE_HOST }}
-        KUBE_CERTIFICAT: ${{ secrets.KUBE_CERTIFICATE }}
+        KUBE_CERTIFICATE: ${{ secrets.KUBE_CERTIFICATE }}
         KUBE_USERNAME: ${{ secrets.KUBE_USERNAME }}
         KUBE_PASSWORD: ${{ secrets.KUBE_PASSWORD }}
       with:
-        args: rollout restart deployment/${{ KUBE_DEPLOYMENT_NAME }} -n ${{ KUBE_NAMESPACE }}
+        args: rollout restart deployment/${{ vars.KUBE_DEPLOYMENT_NAME }} -n ${{ vars.KUBE_NAMESPACE }}
