@@ -20,26 +20,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
   steps:
-  - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-  - name: Login to Docker Hub
-    uses: docker/login-action@v3
-    with:
-      username: ${{ vars.DOCKERHUB_USERNAME }}
-      password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  - name: Build and push Docker image
-    run: |
-      cd backend
-      docker build -t ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
-      docker push ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
+    - name: Build and push Docker image
+      run: |
+        cd backend
+        docker build -t ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
+        docker push ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
 
-  - name: Deploy to Pepper
-  - uses: actions-hub/kubectl@master
-    env:
-      KUBE_HOST: ${{ secrets.KUBE_HOST }}
-      KUBE_CERTIFICAT: ${{ secrets.KUBE_CERTIFICATE }}
-      KUBE_USERNAME: ${{ secrets.KUBE_USERNAME }}
-      KUBE_PASSWORD: ${{ secrets.KUBE_PASSWORD }}
-    with:
-      args: rollout restart deployment/${{ KUBE_DEPLOYMENT_NAME }} -n ${{ KUBE_NAMESPACE }}
+    - name: Deploy to Pepper
+      uses: actions-hub/kubectl@master
+      env:
+        KUBE_HOST: ${{ secrets.KUBE_HOST }}
+        KUBE_CERTIFICAT: ${{ secrets.KUBE_CERTIFICATE }}
+        KUBE_USERNAME: ${{ secrets.KUBE_USERNAME }}
+        KUBE_PASSWORD: ${{ secrets.KUBE_PASSWORD }}
+      with:
+        args: rollout restart deployment/${{ KUBE_DEPLOYMENT_NAME }} -n ${{ KUBE_NAMESPACE }}
