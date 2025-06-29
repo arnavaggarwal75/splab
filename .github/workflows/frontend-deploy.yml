@@ -25,3 +25,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SPLAB_A26F8 }}
           projectId: splab-a26f8
           channelId: live
+          entryPoint: frontend/
