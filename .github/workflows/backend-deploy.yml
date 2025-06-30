@@ -2,6 +2,8 @@
 # DOCKERHUB_TOKEN
 # KUBE_HOST
 # KUBE_TOKEN
+# TS_OAUTH_CLIENT_ID
+# TS_OAUTH_SECRET
 
 # Required Github Variables:
 # DOCKERHUB_USERNAME
@@ -14,6 +16,10 @@ name: backend-cicd
 on:
   push:
     branches: main
+
+env:
+  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{ github.sha }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -29,8 +35,15 @@ jobs:
       - name: Build and push Docker image
         run: |
           cd backend
-          docker build -t ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest .
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
+
+      - name: Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
 
       - name: Set the Kubernetes context
         uses: azure/k8s-set-context@v4
@@ -44,5 +57,10 @@ jobs:
         with:
           namespace: 'splab'
           manifests: |
-            k8s/splab.yaml
+            k8s/deployment.yaml
           images: '${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest'
+
+      - name: Update the Deployment Image
+        run: |
+          kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME
+

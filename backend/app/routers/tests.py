@@ -10,6 +10,10 @@ router = APIRouter(
 async def test_root():
     return {"This test worked ! The backend is running unga bunga - 🐒"}
 
+@router.get("/ci-cd")
+def test_cicd():
+    return {"CI-CD Pipeline worked!!!"}
+
 # Sample Read and Write endpoints for Firestore
 @router.post("/test-write")
 def test_write():
