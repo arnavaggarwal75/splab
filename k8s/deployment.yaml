@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: splab-backend
+  namespace: splab
+  labels:
+    app: splab-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: splab-backend
+  template:
+    metadata:
+      labels:
+        app: splab-backend
+    spec:
+      containers:
+      - name: splab-backend
+        image: neiphu/splab-backend:latest
+        env:
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: splab-env
+              key: GEMINI_API_KEY
+        ports:
+        - containerPort: 8000
+      imagePullSecrets:
+        - name: docker-credentials

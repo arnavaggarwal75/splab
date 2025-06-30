@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: splab-clusterip
+  namespace: splab
+  labels:
+    app: splab-clusterip
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: splab-backend
+

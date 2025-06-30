@@ -1,13 +1,11 @@
 # Required GitHub Secrets:
 # DOCKERHUB_TOKEN
-# DOCKERHUB_REPO
 # KUBE_HOST
-# KUBE_CERTIFICATE
-# KUBE_USERNAME
-# KUBE_PASSWORD
+# KUBE_TOKEN
 
 # Required Github Variables:
 # DOCKERHUB_USERNAME
+# DOCKERHUB_REPO
 # KUBE_DEPLOYMENT_NAME
 # KUBE_NAMESPACE
 
@@ -34,12 +32,17 @@ jobs:
           docker build -t ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest .
           docker push ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
 
-      - name: Deploy to Pepper
-        uses: actions-hub/kubectl@master
-        env:
-          KUBE_HOST: ${{ secrets.KUBE_HOST }}
-          KUBE_CERTIFICATE: ${{ secrets.KUBE_CERTIFICATE }}
-          KUBE_USERNAME: ${{ secrets.KUBE_USERNAME }}
-          KUBE_PASSWORD: ${{ secrets.KUBE_PASSWORD }}
+      - name: Set the Kubernetes context
+        uses: azure/k8s-set-context@v4
         with:
-          args: rollout restart deployment/${{ vars.KUBE_DEPLOYMENT_NAME }} -n ${{ vars.KUBE_NAMESPACE }}
+          method: service-account
+          k8s-url: ${{ secrets.KUBE_HOST }}
+          k8s-secret: ${{ secrets.KUBE_TOKEN }}
+
+      - name: Deploy to the Kubernetes cluster
+        uses: azure/k8s-deploy@v5
+        with:
+          namespace: 'splab'
+          manifests: |
+            k8s/splab.yaml
+          images: '${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest'
