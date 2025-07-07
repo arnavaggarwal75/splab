@@ -52,14 +52,6 @@ jobs:
           k8s-url: ${{ secrets.KUBE_HOST }}
           k8s-secret: ${{ secrets.KUBE_TOKEN }}
 
-      - name: Deploy to the Kubernetes cluster
-        uses: azure/k8s-deploy@v5
-        with:
-          namespace: 'splab'
-          manifests: |
-            k8s/deployment.yaml
-          images: '${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest'
-
       - name: Update the Deployment Image
         run: |
           kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME
