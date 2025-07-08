@@ -52,6 +52,10 @@ jobs:
           k8s-url: ${{ secrets.KUBE_HOST }}
           k8s-secret: ${{ secrets.KUBE_TOKEN }}
 
+      - name: Test connectivity to API server
+        run: |
+          curl -k https://${{ secrets.KUBE_HOST }}:6443/version
+
       - name: Update the Deployment Image
         run: |
           kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME
