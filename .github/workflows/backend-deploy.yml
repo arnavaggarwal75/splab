@@ -54,7 +54,7 @@ jobs:
 
       - name: Test connectivity to API server
         run: |
-          curl -k https://${{ secrets.KUBE_HOST }}:6443/version
+          curl -k ${{ secrets.KUBE_HOST }}/version
 
       - name: Update the Deployment Image
         run: |
