@@ -8,9 +8,9 @@ name: frontend-cicd
 on:
   push:
     branches:
-      - main
+      - cicd
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
