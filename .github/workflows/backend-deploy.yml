@@ -16,7 +16,7 @@
 name: backend-cicd
 on:
   push:
-    branches: cicd
+    branches: main
 
 env:
   IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{ github.sha }}

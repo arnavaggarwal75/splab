@@ -8,7 +8,7 @@ name: frontend-cicd
 on:
   push:
     branches:
-      - cicd
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
