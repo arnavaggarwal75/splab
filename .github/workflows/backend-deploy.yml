@@ -62,5 +62,5 @@ jobs:
 
       - name: Update the Deployment Image
         run: |
-          kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME
+          kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME -n splab
 
