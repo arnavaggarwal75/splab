@@ -38,10 +38,10 @@ jobs:
           cd backend/app
           echo "${{ secrets.SERVICE_ACCOUNT_KEY_ENCODED }}" > serviceAccountKey_base64.txt
           base64 -d serviceAccountKey_base64.txt > serviceAccountKey.json
-          cd ..
 
       - name: Build and push Docker image
         run: |
+          cd backend
           docker build -t $IMAGE_NAME .
           docker push $IMAGE_NAME
 
