@@ -4,6 +4,7 @@
 # KUBE_TOKEN
 # TS_OAUTH_CLIENT_ID
 # TS_OAUTH_SECRET
+# SERVICE_ACCOUNT_KEY_ENCODED
 
 # Required Github Variables:
 # DOCKERHUB_USERNAME
@@ -32,6 +33,12 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Add Firebase serviceAccountKey.json
+        run: |
+          cd backend/app
+          echo "${{ secrets.SERVICE_ACCOUNT_KEY_ENCODED }}" > serviceAccountKey_base64.txt
+          base64 -d serviceAccountKey_base64.txt > serviceAccountKey.json
+
       - name: Build and push Docker image
         run: |
           cd backend
@@ -52,15 +59,7 @@ jobs:
           k8s-url: ${{ secrets.KUBE_HOST }}
           k8s-secret: ${{ secrets.KUBE_TOKEN }}
 
-      - name: Check tailscale status
-        run: |
-          tailscale status
-
-      - name: Test connectivity to API server
-        run: |
-          curl -k ${{ secrets.KUBE_HOST }}/version
-
       - name: Update the Deployment Image
         run: |
-          kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME
+          kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME -n splab
 

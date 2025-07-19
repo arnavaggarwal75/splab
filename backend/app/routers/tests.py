@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.db import db, create_tab, get_tab, add_items_to_tab, get_items_in_tab, update_item_members, add_member_to_tab, get_members_in_tab
+from datetime import date
 
 router = APIRouter(
     prefix="/tests",
@@ -10,9 +11,10 @@ router = APIRouter(
 async def test_root():
     return {"This test worked ! The backend is running unga bunga - 🐒"}
 
+start_day = date.today()
 @router.get("/ci-cd")
 def test_cicd():
-    return {"CI-CD Pipeline worked!!!"}
+    return {f"CI-CD Pipeline worked!!! Today's date is {start_day}"}
 
 # Sample Read and Write endpoints for Firestore
 @router.post("/test-write")
