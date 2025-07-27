@@ -1,5 +1,8 @@
 # Splab
 
+## App Link
+https://splab-a26f8.web.app/
+
 ## Inspiration
 Restaurants don't like splitting bills by item, and sometimes nobody wants to pay the whole bill.
 So, there needs to be a way to keep track of who owes what without any nagging.
