@@ -19,7 +19,7 @@ on:
     branches: main
 
 env:
-  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{ github.sha }}
+  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:latest
 
 jobs:
   deploy:
@@ -44,22 +44,3 @@ jobs:
           cd backend
           docker build -t $IMAGE_NAME .
           docker push $IMAGE_NAME
-
-      - name: Login to Tailscale
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-
-      - name: Set the Kubernetes context
-        uses: azure/k8s-set-context@v4
-        with:
-          method: service-account
-          k8s-url: ${{ secrets.KUBE_HOST }}
-          k8s-secret: ${{ secrets.KUBE_TOKEN }}
-
-      - name: Update the Deployment Image
-        run: |
-          kubectl set image deployment/splab-backend splab-backend=$IMAGE_NAME -n splab
-
